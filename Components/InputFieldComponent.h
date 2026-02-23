@@ -11,7 +11,7 @@
 class InputFieldComponent : public Component
 {
 public:
-    InputFieldComponent(std::size_t maxLength = 16,
+    InputFieldComponent(std::size_t maxLength = 12,
                         const std::string &placeholder = "Enter text")
         : maxLength(maxLength),
           placeholder(placeholder),

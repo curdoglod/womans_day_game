@@ -14,7 +14,7 @@ void StartScene::Init()
     if (MainGameScene::GetPlayerName() != "")
         inputComp->setValue(MainGameScene::GetPlayerName());
     inputField->AddComponent(inputComp);
-    inputField->GetComponent<Image>()->SetSize(Vector2(150, 50));
+    inputField->GetComponent<Image>()->SetSize(Vector2(200, 50));
     inputField->SetPosition(GetWindowSize() / 2 - inputField->GetComponent<Image>()->GetSize() / 2);
     inputField->SetPosition(inputField->GetPosition() + Vector2(0, 80));
 
