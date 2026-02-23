@@ -22,12 +22,16 @@ public:
 
     void SetCar(int number);
 
+    void SetFrozen(bool frozen);
+    bool IsFrozen() const { return _frozen; }
+
 private:
     Rigidbody *_rigidbody;
     Vector2 windowSize;
     int moveDirection = 0;
     Camera *camera;
     bool bump;
+    bool _frozen = false;
     Image* img; 
     int setedCar; 
     std::vector<std::vector<unsigned char>> carImgData; 

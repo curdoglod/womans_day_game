@@ -2,7 +2,8 @@
 
 #include "../Core/SceneManager.h"
 #include "../Core/components.h"
-class PaddleComponent; 
+class PaddleComponent;
+class RobotHand;
 
 class MainGameScene : public SceneManager
 {
@@ -26,6 +27,7 @@ public:
 private:
 	void Generate_map(int count);
 	void ShowTime();
+	void StartHandTransition(int pressIndex);
 
 	Sprite *bck = nullptr;
 	Object *player = nullptr;
@@ -43,6 +45,10 @@ private:
 	Vector2 sizeOfPress;
 
 	int count_presses;
+
+	bool handTransitionActive = false;
+	Object *handObj = nullptr;
+	RobotHand *robotHand = nullptr;
 
 	static std::string playerName;
 	

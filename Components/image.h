@@ -53,6 +53,16 @@ public:
         return sprite; 
     }
 
+    void SetPivot(int x, int y) {
+        if (sprite != nullptr)
+            sprite->setPivot(x, y);
+    }
+
+    void SetFlip(SDL_RendererFlip flip) {
+        if (sprite != nullptr)
+            sprite->setFlip(flip);
+    }
+
     ~Image() {
         delete sprite; 
     }

@@ -1,6 +1,7 @@
 #include "SceneDeclarations.h"
 #include "paddle.h"
 #include "Press.h"
+#include "RobotHand.h"
 #include <chrono>
 #include "ScoreBoard.h"
 
@@ -12,7 +13,7 @@ MainGameScene::MainGameScene(const std::string &name)
 void MainGameScene::Init()
 {
 	score = 0;
-	count_presses = 1;
+	count_presses = 3;
 	std::vector<unsigned char> ballImgData = Engine::GetResourcesArchive()->GetFile("ball.png");
 	std::vector<unsigned char> blockImgData = Engine::GetResourcesArchive()->GetFile("block.png");
 	std::vector<unsigned char> bckImgData = Engine::GetResourcesArchive()->GetFile("background.png");
@@ -29,7 +30,7 @@ void MainGameScene::Init()
 	player->AddComponent(playerComp);
 	player->SetLayer(-2);
 
-	for (int i = 0; i < count_presses * 2; i++)
+	for (int i = 0; i < count_presses * 3; i++)
 	{
 		Image *bckimg = new Image(bckImgData);
 		Object *bck = CreateObject();
@@ -58,7 +59,7 @@ void MainGameScene::Generate_map(int count)
 		float height_pos = (rand() % (2 * interval)) - interval;
 
 		blocks.push_back(CreateObject());
-		blocks[i]->SetPosition(Vector2(400 + 600 * i, height_pos));
+		blocks[i]->SetPosition(Vector2(400 + 900 * i, height_pos));
 		blocks[i]->AddComponent(new Press(player));
 	}
 
@@ -71,21 +72,48 @@ void MainGameScene::Generate_map(int count)
 
 void MainGameScene::Update()
 {
-	for (int i = current_press_num; i < blocks.size(); i++)
+	if (handTransitionActive)
+	{
+		if (robotHand && robotHand->IsCompleted())
+		{
+			robotHand->Cleanup();
+			DeleteObject(handObj);
+			handObj = nullptr;
+			robotHand = nullptr;
+			handTransitionActive = false;
+
+			if (current_press_num < (int)blocks.size())
+				blocks[current_press_num]->GetComponent<Press>()->SetCurrent(true);
+		}
+		scoreText->setText("Score: " + std::to_string(current_press_num));
+		ShowTime();
+		return;
+	}
+
+	for (int i = current_press_num; i < (int)blocks.size(); i++)
+	{
 		if (player->GetPosition().x >= blocks[i]->GetPosition().x + sizeOfPress.x)
 		{
 			blocks[i]->GetComponent<Press>()->SetCurrent(false);
-			if (i + 1 < blocks.size())
-				blocks[i + 1]->GetComponent<Press>()->SetCurrent(true);
 			current_press_num = i + 1;
+
+			if (i + 1 < (int)blocks.size())
+			{
+				StartHandTransition(i);
+				break;
+			}
 		}
 		else
+		{
 			break;
+		}
+	}
 
 	scoreText->setText("Score: " + std::to_string(current_press_num));
 	ShowTime();
 
-	if (current_press_num == count_presses && blocks.size() > 0 && player->GetPosition().x >= blocks[count_presses - 1]->GetPosition().x + sizeOfPress.x + 100)
+	if (current_press_num == count_presses && blocks.size() > 0 &&
+		player->GetPosition().x >= blocks[count_presses - 1]->GetPosition().x + sizeOfPress.x + 100)
 	{
 		ScoreBoard *scoreBoard = new ScoreBoard("Assets/statistics.csv");
 		std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
@@ -96,6 +124,15 @@ void MainGameScene::Update()
 		SwitchToScene(new WinScene());
 	}
 	playerComp->SetCar(current_press_num);
+}
+
+void MainGameScene::StartHandTransition(int pressIndex)
+{
+	float targetX = blocks[pressIndex + 1]->GetPosition().x - 200;
+	handObj = CreateObject();
+	robotHand = new RobotHand(player, targetX);
+	handObj->AddComponent(robotHand);
+	handTransitionActive = true;
 }
 
 void MainGameScene::ShowTime()

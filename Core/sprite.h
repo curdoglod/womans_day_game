@@ -18,13 +18,18 @@ public:
     friend class SceneManager;
     void SetColorAndOpacity(Uint8 red, Uint8 green, Uint8 blue, float alpha);
     void setAngle(float angle); 
+    void setPivot(int x, int y);
+    void setFlip(SDL_RendererFlip flip);
 private:
    // Sprite(SDL_Texture* m_texture, SDL_Renderer* renderer);
     Sprite(const std::vector<unsigned char>& imageData, SDL_Renderer* renderer);
     SDL_Texture* m_texture;
     SDL_Renderer* m_renderer;
     SDL_Rect m_destRect;
-    float m_angle = 0.0f; 
+    float m_angle = 0.0f;
+    SDL_Point m_pivot;
+    bool m_useCustomPivot = false;
+    SDL_RendererFlip m_flip = SDL_FLIP_NONE;
 };
 
 #endif // SPRITE_H

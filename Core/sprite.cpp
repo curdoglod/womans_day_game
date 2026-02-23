@@ -53,14 +53,15 @@ Sprite::~Sprite() {
 }
 
 void Sprite::draw() {
-    SDL_RenderCopyEx(m_renderer, m_texture, nullptr, &m_destRect, m_angle, nullptr, SDL_FLIP_NONE);
-
+    SDL_Point *pivot = m_useCustomPivot ? &m_pivot : nullptr;
+    SDL_RenderCopyEx(m_renderer, m_texture, nullptr, &m_destRect, m_angle, pivot, m_flip);
 }
 
 void Sprite::draw(const Vector2& vec2) {
     m_destRect.x = (int)vec2.x;
     m_destRect.y = (int)vec2.y;
-    SDL_RenderCopyEx(m_renderer, m_texture, nullptr, &m_destRect, m_angle, nullptr, SDL_FLIP_NONE);
+    SDL_Point *pivot = m_useCustomPivot ? &m_pivot : nullptr;
+    SDL_RenderCopyEx(m_renderer, m_texture, nullptr, &m_destRect, m_angle, pivot, m_flip);
 }
 
 void Sprite::SetColorAndOpacity(Uint8 red, Uint8 green, Uint8 blue, float alpha) {
@@ -86,4 +87,15 @@ Vector2  Sprite::getSize() {
 void Sprite::setAngle(float angle)
 {
     m_angle = angle; 
+}
+
+void Sprite::setPivot(int x, int y)
+{
+    m_pivot = {x, y};
+    m_useCustomPivot = true;
+}
+
+void Sprite::setFlip(SDL_RendererFlip flip)
+{
+    m_flip = flip;
 }

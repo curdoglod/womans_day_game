@@ -36,10 +36,8 @@ void PaddleComponent::onKeyPressed(SDL_Keycode key)
 
 void PaddleComponent::onKeyReleased(SDL_Keycode key)
 {
-    // if ((key == SDLK_RIGHT && moveDirection == 1) || (key == SDLK_LEFT && moveDirection == -1))
-    // {
-    //     moveDirection = 0;
-    // }
+    if (_frozen) return;
+
     if (key == SDLK_SPACE)
     {
         if (_rigidbody->getVelocity().y >= -50.0f && _rigidbody->isUsingGravity())
@@ -49,36 +47,35 @@ void PaddleComponent::onKeyReleased(SDL_Keycode key)
 
 void PaddleComponent::Update()
 {
-    if (object != nullptr)
+    if (_frozen || object == nullptr)
+        return;
+
+    windowSize = object->GetScene()->GetWindowSize();
+
+    if (object->GetPosition().x <= 0)
+        object->SetPosition(Vector2(0, object->GetPosition().y));
+
+    if (object->GetPosition().y > windowSize.y - object->GetSize().y)
     {
-        windowSize = object->GetScene()->GetWindowSize();
+        object->SetPosition(Vector2(object->GetPosition().x, windowSize.y - object->GetSize().y));
+        _rigidbody->setVelocity(Vector2(_rigidbody->getVelocity().x, 0));
+    }
 
-        if (object->GetPosition().x <= 0)
-            object->SetPosition(Vector2(0, object->GetPosition().y));
+    if (object->GetPosition().y < 0)
+    {
+        object->SetPosition(Vector2(object->GetPosition().x, 0));
+        _rigidbody->setVelocity(Vector2(_rigidbody->getVelocity().x, 0));
+    }
 
-        if (object->GetPosition().y > windowSize.y - object->GetSize().y)
-        {
-            object->SetPosition(Vector2(object->GetPosition().x, windowSize.y - object->GetSize().y));
-            _rigidbody->setVelocity(Vector2(_rigidbody->getVelocity().x, 0));
-        }
+    if (bump)
+    {
+        if (_rigidbody->getVelocity().x > 0)
+            bump = false;
+    }
 
-        if (object->GetPosition().y < 0)
-        {
-            object->SetPosition(Vector2(object->GetPosition().x, 0));
-            _rigidbody->setVelocity(Vector2(_rigidbody->getVelocity().x, 0));
-        }
-
-        if (bump)
-        {
-
-            if (_rigidbody->getVelocity().x > 0)
-                bump = false;
-        }
-
-        if (_rigidbody->getVelocity().x < max_speed.x)
-        {
-            _rigidbody->setVelocity(Vector2(_rigidbody->getVelocity().x + 1.0f, _rigidbody->getVelocity().y));
-        }
+    if (_rigidbody->getVelocity().x < max_speed.x)
+    {
+        _rigidbody->setVelocity(Vector2(_rigidbody->getVelocity().x + 1.0f, _rigidbody->getVelocity().y));
     }
 }
 
@@ -100,4 +97,19 @@ void PaddleComponent::SetCar(int number)
     if(setedCar!=number && carImgData.size()>number)
         img->SetNewSprite(carImgData[number]); 
     setedCar = number; 
+}
+
+void PaddleComponent::SetFrozen(bool frozen)
+{
+    _frozen = frozen;
+    if (frozen)
+    {
+        _rigidbody->setVelocity(Vector2(0, 0));
+        _rigidbody->setUseGravity(false);
+    }
+    else
+    {
+        _rigidbody->setUseGravity(true);
+        _rigidbody->setVelocity(Vector2(max_speed.x, 0));
+    }
 }
