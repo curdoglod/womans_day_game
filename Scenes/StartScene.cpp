@@ -13,7 +13,7 @@ void StartScene::Init()
 	background->AddComponent(new Image(bck_img));
 	background->SetLayer(-100);
 	Object *inputField = CreateObject();
-	InputFieldComponent *inputComp = new InputFieldComponent(12, "Enter text",
+	InputFieldComponent *inputComp = new InputFieldComponent(12, "Enter your name",
 			0.0f, TextAlignment::CENTER);
 	if (MainGameScene::GetPlayerName() != "")
 		inputComp->setValue(MainGameScene::GetPlayerName());

@@ -14,6 +14,7 @@ public:
     void Update() override;
 
     void onKeyReleased(SDL_Keycode key) override; 
+    void SlowDown();
 
     void SetCurrent(bool curr)
     {

@@ -46,8 +46,8 @@ public:
         Vector2 playerSize = player->GetSize();
         Vector2 clawSize = clawObj->GetSize();
 
-        float clawX = clawXForPlayerX(playerPos.x);
-        clawObj->SetPosition(Vector2(clawX, -clawSize.y));
+        Vector2 clawStart = clawPosForPlayerPos(playerPos);
+        clawObj->SetPosition(Vector2(clawStart.x, -clawSize.y));
         clawObj->SetAngle(baseClawAngle);
         armObj->SetAngle(baseArmAngle);
         updateArmPosition();
@@ -74,14 +74,21 @@ public:
         {
         case Phase::DESCEND:
         {
-            // Плавно следим за игроком по X во время спуска
-            float targetClawX = clawXForPlayerX(player->GetPosition().x);
-            clawPos.x += (targetClawX - clawPos.x) * 0.1f * dt;
+            // Целевая позиция клешни — из текущей позиции игрока
+            Vector2 targetClawPos = clawPosForPlayerPos(player->GetPosition());
+
+            // Плавно обновляем grabY
+            if (targetClawPos.y < grabY) grabY = targetClawPos.y;
+            else grabY += (targetClawPos.y - grabY) * 0.05f * dt;
+
+            // Плавно следим за игроком по X
+            clawPos.x += (targetClawPos.x - clawPos.x) * 0.1f * dt;
             clawPos.y += descendSpeed * dt;
             clawObj->SetPosition(clawPos);
 
-            float progress = (clawPos.y + clawSize.y) / (grabY + clawSize.y);
-            float swingAngle = std::sin(progress * 3.14159f) * 8.0f;
+            float totalDist = grabY + clawSize.y;
+            float progress = totalDist > 0 ? (clawPos.y + clawSize.y) / totalDist : 1.0f;
+            float swingAngle = std::sin(std::min(progress, 1.0f) * 3.14159f) * 8.0f;
             clawObj->SetAngle(baseClawAngle + swingAngle);
             armObj->SetAngle(baseArmAngle + swingAngle * 0.5f);
             updateArmPosition();
@@ -89,8 +96,8 @@ public:
             if (clawPos.y >= grabY)
             {
                 player->GetComponent<PaddleComponent>()->SetFrozen(true);
-                float snapClawX = clawXForPlayerX(player->GetPosition().x);
-                clawObj->SetPosition(Vector2(snapClawX, grabY));
+                Vector2 snapClawPos = clawPosForPlayerPos(player->GetPosition());
+                clawObj->SetPosition(snapClawPos);
                 clawObj->SetAngle(baseClawAngle);
                 armObj->SetAngle(baseArmAngle);
                 updateArmPosition();
@@ -126,8 +133,8 @@ public:
         }
         case Phase::CARRY:
         {
-            float currentPlayerX = playerXForClawX(clawPos.x);
-            float dist = targetX - currentPlayerX;
+            Vector2 currentPlayerPos = playerPosForClawPos(clawPos);
+            float dist = targetX - currentPlayerPos.x;
             float dir = (dist > 0) ? 1.0f : -1.0f;
 
             float speed = carrySpeed * dt;
@@ -140,11 +147,12 @@ public:
             clawObj->SetAngle(baseClawAngle + swingAngle);
             armObj->SetAngle(baseArmAngle + swingAngle * 0.5f);
 
-            float newPlayerX = playerXForClawX(newClawX);
-            bool arrived = (dir > 0) ? (newPlayerX >= targetX) : (newPlayerX <= targetX);
+            Vector2 newPlayerPos = playerPosForClawPos(Vector2(newClawX, clawPos.y));
+            bool arrived = (dir > 0) ? (newPlayerPos.x >= targetX) : (newPlayerPos.x <= targetX);
             if (arrived)
             {
-                newClawX = clawXForPlayerX(targetX);
+                Vector2 finalClawPos = clawPosForPlayerPos(Vector2(targetX, newPlayerPos.y));
+                newClawX = finalClawPos.x;
                 clawObj->SetAngle(baseClawAngle);
                 armObj->SetAngle(baseArmAngle);
             }
@@ -179,6 +187,7 @@ public:
             if (timer > 30)
             {
                 player->GetComponent<PaddleComponent>()->SetFrozen(false);
+                player->SetAngle(0);
                 phase = Phase::RETREAT;
             }
             break;
@@ -239,8 +248,8 @@ private:
     float clawAttachOffsetY = 30.0f;   
     float clawAttachOffsetX = -75.0f; //dont touch this
 
-    float playerGrabOffsetX = 100.0f; 
-    float playerGrabOffsetY = -5.0f;  
+    float playerGrabOffsetX = 112.0f; 
+    float playerGrabOffsetY = -25.0f;  
 
     void updateArmPosition()
     {
@@ -278,26 +287,32 @@ private:
             pivotY));
     }
 
-    // Вычисляет clawX чтобы игрок оказался в playerX (при базовых углах)
-    float clawXForPlayerX(float playerX)
+    Vector2 clawPosForPlayerPos(Vector2 playerPos)
     {
         Vector2 cSize = clawObj->GetSize();
         Vector2 pSize = player->GetSize();
         float rad = baseClawAngle * 3.14159f / 180.0f;
+        float localX = playerGrabOffsetX;
         float localY = cSize.y + playerGrabOffsetY;
-        float rotX = playerGrabOffsetX * std::cos(rad) - localY * std::sin(rad);
-        return playerX + pSize.x / 2.0f - cSize.x / 2.0f - rotX;
+        float rotX = localX * std::cos(rad) - localY * std::sin(rad);
+        float rotY = localX * std::sin(rad) + localY * std::cos(rad);
+        return Vector2(
+            playerPos.x + pSize.x / 2.0f - cSize.x / 2.0f - rotX,
+            playerPos.y - rotY);
     }
 
-    // Обратная: вычисляет playerX из clawX (при базовых углах)
-    float playerXForClawX(float clawX)
+    Vector2 playerPosForClawPos(Vector2 clawPos)
     {
         Vector2 cSize = clawObj->GetSize();
         Vector2 pSize = player->GetSize();
         float rad = baseClawAngle * 3.14159f / 180.0f;
+        float localX = playerGrabOffsetX;
         float localY = cSize.y + playerGrabOffsetY;
-        float rotX = playerGrabOffsetX * std::cos(rad) - localY * std::sin(rad);
-        return clawX + cSize.x / 2.0f + rotX - pSize.x / 2.0f;
+        float rotX = localX * std::cos(rad) - localY * std::sin(rad);
+        float rotY = localX * std::sin(rad) + localY * std::cos(rad);
+        return Vector2(
+            clawPos.x + cSize.x / 2.0f + rotX - pSize.x / 2.0f,
+            clawPos.y + rotY);
     }
 
     void syncPlayerToClaw()
@@ -322,5 +337,6 @@ private:
         float px = cPos.x + cSize.x / 2.0f + rotX - pSize.x / 2.0f;
         float py = cPos.y + rotY;
         player->SetPosition(Vector2(px, py));
+        player->SetAngle(clawAngle*0.7f);
     }
 };

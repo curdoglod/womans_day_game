@@ -13,7 +13,7 @@ MainGameScene::MainGameScene(const std::string &name)
 void MainGameScene::Init()
 {
 	score = 0;
-	count_presses = 3;
+	count_presses = 6;
 	std::vector<unsigned char> ballImgData = Engine::GetResourcesArchive()->GetFile("ball.png");
 	std::vector<unsigned char> blockImgData = Engine::GetResourcesArchive()->GetFile("block.png");
 	std::vector<unsigned char> bckImgData = Engine::GetResourcesArchive()->GetFile("background.png");
@@ -128,7 +128,7 @@ void MainGameScene::Update()
 
 void MainGameScene::StartHandTransition(int pressIndex)
 {
-	float targetX = blocks[pressIndex + 1]->GetPosition().x - 400;
+	float targetX = blocks[pressIndex + 1]->GetPosition().x - 350;
 	handObj = CreateObject();
 	robotHand = new RobotHand(player, targetX);
 	handObj->AddComponent(robotHand);
@@ -154,6 +154,17 @@ void MainGameScene::ShowTime()
 
 void MainGameScene::onKeyReleased(SDL_Keycode key)
 {
+	if (key == SDLK_RETURN && handTransitionActive)
+	{
+		if (current_press_num < (int)blocks.size())
+		{
+			Press *nextPress = blocks[current_press_num]->GetComponent<Press>();
+			if (nextPress)
+				nextPress->SlowDown();
+		}
+		return;
+	}
+
 	if (key == SDLK_ESCAPE)
 		SwitchToScene(new StartScene());
 }

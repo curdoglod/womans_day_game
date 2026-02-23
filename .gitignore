@@ -3,3 +3,5 @@ build/
 *.exe
 .DS_Store
 *.app
+*.csv
+Assets/statistics.csv

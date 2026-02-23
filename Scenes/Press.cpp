@@ -99,11 +99,15 @@ void Press::onKeyReleased(SDL_Keycode key)
 {
     if (key == SDLK_RETURN)
     {
-        if (current_blocks && speed_closing >= 0.2f)
-        {
-            speed_closing -= 0.15f;
-        }
+        if (current_blocks)
+            SlowDown();
     }
+}
+
+void Press::SlowDown()
+{
+    if (speed_closing >= 0.2f)
+        speed_closing -= 0.15f;
 }
 
 Vector2 Press::GetSizePress() const
