@@ -134,18 +134,18 @@ public:
       
             switch (alignment) {
             case TextAlignment::LEFT:
-                renderQuad.x = object->GetPosition().x ;
+                renderQuad.x = object->GetPosition().x + offsetX;
                 break;
             case TextAlignment::CENTER:
-                renderQuad.x = object->GetPosition().x - renderQuad.w / 2 + spriteSize.x / 2;
+                renderQuad.x = object->GetPosition().x - renderQuad.w / 2 + spriteSize.x / 2 + offsetX;
                 break;
             case TextAlignment::RIGHT:
-                renderQuad.x = object->GetPosition().x + spriteSize.x -  renderQuad.w;
+                renderQuad.x = object->GetPosition().x + spriteSize.x -  renderQuad.w + offsetX;
                 break;
             }
 
      
-            renderQuad.y = object->GetPosition().y + (spriteSize.y - renderQuad.h) / 2;
+            renderQuad.y = object->GetPosition().y + (spriteSize.y - renderQuad.h) / 2 + offsetY;
 
             if (outlineTexture && outlineSize > 0) {
                 SDL_Rect outlineQuad = renderQuad;
@@ -164,6 +164,11 @@ public:
         color = {r,g,b,a}; 
         UpdateTextures();
     }
+
+    void SetOffset(float x, float y) {
+        offsetX = x;
+        offsetY = y;
+    }
 private:
     std::string text;
     SDL_Color color;
@@ -176,6 +181,8 @@ private:
     TextAlignment alignment;
     int outlineSize;
     SDL_Color outlineColor;
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
    
 };
 

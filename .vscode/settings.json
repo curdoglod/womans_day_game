@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "clocale": "cpp",
+        "cstddef": "cpp",
+        "ctime": "cpp",
+        "limits": "cpp",
+        "ratio": "cpp",
+        "string": "cpp"
+    }
+}

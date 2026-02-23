@@ -12,9 +12,13 @@ class InputFieldComponent : public Component
 {
 public:
     InputFieldComponent(std::size_t maxLength = 12,
-                        const std::string &placeholder = "Enter text")
+                        const std::string &placeholder = "Enter text",
+                        float paddingLeft = 10.0f,
+                        TextAlignment alignment = TextAlignment::LEFT)
         : maxLength(maxLength),
           placeholder(placeholder),
+          paddingLeft(paddingLeft),
+          alignment(alignment),
           hasFocus(false),
           image(nullptr),
           textComp(nullptr)
@@ -38,8 +42,9 @@ public:
         {
 
             textComp =
-                new TextComponent(24, value, TextAlignment::LEFT);
+                new TextComponent(24, value, alignment);
             object->AddComponent(textComp);
+            textComp->SetOffset(paddingLeft, 3.0f);
             if (value.empty())
             {
                 textComp->SetColor(100, 100, 100);
@@ -48,6 +53,7 @@ public:
         }
         else
         {
+            textComp->SetOffset(paddingLeft, 0.0f);
             textComp->SetColor(100, 100, 100);
             textComp->setText(placeholder);
         }
@@ -121,6 +127,8 @@ public:
 private:
     std::size_t maxLength;
     std::string placeholder;
+    float paddingLeft;
+    TextAlignment alignment;
     std::string value;
     bool hasFocus;
 
