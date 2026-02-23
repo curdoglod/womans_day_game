@@ -54,7 +54,7 @@ public:
 
         grabY = playerPos.y - clawSize.y + 20;
         liftY = 50.0f;
-        groundY = object->GetScene()->GetWindowSize().y - playerSize.y - 50;
+        groundY = object->GetScene()->GetWindowSize().y/2 + 50;
 
         phase = Phase::DESCEND;
     }
@@ -239,8 +239,8 @@ private:
     float clawAttachOffsetY = 30.0f;   
     float clawAttachOffsetX = -75.0f; //dont touch this
 
-    float playerGrabOffsetX = 70.0f; 
-    float playerGrabOffsetY = 10.0f;  
+    float playerGrabOffsetX = 100.0f; 
+    float playerGrabOffsetY = -5.0f;  
 
     void updateArmPosition()
     {

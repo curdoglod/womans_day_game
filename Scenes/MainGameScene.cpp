@@ -128,7 +128,7 @@ void MainGameScene::Update()
 
 void MainGameScene::StartHandTransition(int pressIndex)
 {
-	float targetX = blocks[pressIndex + 1]->GetPosition().x - 200;
+	float targetX = blocks[pressIndex + 1]->GetPosition().x - 400;
 	handObj = CreateObject();
 	robotHand = new RobotHand(player, targetX);
 	handObj->AddComponent(robotHand);
