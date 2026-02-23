@@ -1,0 +1,11 @@
+#pragma once
+#include "object.h"
+#include "component.h"
+#include "../Components/button.h"
+#include "../Components/rigidbody.h"
+#include "sprite.h"
+#include "../Components/image.h"
+#include "../Components/text.h"
+#include "../Components/Camera.h"
+#include "../Scenes/Press.h"
+#include "../Components/InputFieldComponent.h"
