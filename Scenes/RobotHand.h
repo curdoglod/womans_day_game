@@ -19,8 +19,8 @@ public:
         DONE
     };
 
-    RobotHand(Object *_player, float _targetX)
-        : player(_player), targetX(_targetX) {}
+    RobotHand(Object *_player, float _targetX, float _groundY = -1.0f, bool _keepFrozen = false)
+        : player(_player), targetX(_targetX), customGroundY(_groundY), keepFrozen(_keepFrozen) {}
 
     void Init() override
     {
@@ -54,7 +54,7 @@ public:
 
         grabY = playerPos.y - clawSize.y + 20;
         liftY = 50.0f;
-        groundY = object->GetScene()->GetWindowSize().y/2 + 50;
+        groundY = (customGroundY > 0.0f) ? customGroundY : object->GetScene()->GetWindowSize().y / 2 + 50;
 
         phase = Phase::DESCEND;
     }
@@ -78,8 +78,10 @@ public:
             Vector2 targetClawPos = clawPosForPlayerPos(player->GetPosition());
 
             // Плавно обновляем grabY
-            if (targetClawPos.y < grabY) grabY = targetClawPos.y;
-            else grabY += (targetClawPos.y - grabY) * 0.05f * dt;
+            if (targetClawPos.y < grabY)
+                grabY = targetClawPos.y;
+            else
+                grabY += (targetClawPos.y - grabY) * 0.05f * dt;
 
             // Плавно следим за игроком по X
             clawPos.x += (targetClawPos.x - clawPos.x) * 0.1f * dt;
@@ -186,7 +188,12 @@ public:
             timer += dt;
             if (timer > 30)
             {
-                player->GetComponent<PaddleComponent>()->SetFrozen(false);
+                if (!keepFrozen)
+                    player->GetComponent<PaddleComponent>()->SetFrozen(false);
+                else
+                {
+                    player->GetComponent<Rigidbody>()->setVelocity(Vector2(60, 0)); 
+                }
                 player->SetAngle(0);
                 phase = Phase::RETREAT;
             }
@@ -229,6 +236,8 @@ public:
 private:
     Object *player;
     float targetX;
+    float customGroundY = -1.0f;
+    bool keepFrozen = false;
 
     Object *clawObj = nullptr;
     Object *armObj = nullptr;
@@ -243,13 +252,13 @@ private:
     const float liftSpeed = 3.0f;
     const float carrySpeed = 5.0f;
 
-    float baseArmAngle = 0.0f;       
-    float baseClawAngle = 40.0f;         
-    float clawAttachOffsetY = 30.0f;   
-    float clawAttachOffsetX = -75.0f; //dont touch this
+    float baseArmAngle = 0.0f;
+    float baseClawAngle = 40.0f;
+    float clawAttachOffsetY = 30.0f;
+    float clawAttachOffsetX = -75.0f; // dont touch this
 
-    float playerGrabOffsetX = 112.0f; 
-    float playerGrabOffsetY = -25.0f;  
+    float playerGrabOffsetX = 112.0f;
+    float playerGrabOffsetY = -25.0f;
 
     void updateArmPosition()
     {
@@ -270,7 +279,7 @@ private:
 
         float localAttachX = clawAttachOffsetX;
         float localAttachY = clawAttachOffsetY;
-        
+
         float rotatedAttachX = localAttachX * std::cos(clawRad) - localAttachY * std::sin(clawRad);
         float rotatedAttachY = localAttachX * std::sin(clawRad) + localAttachY * std::cos(clawRad);
 
@@ -337,6 +346,6 @@ private:
         float px = cPos.x + cSize.x / 2.0f + rotX - pSize.x / 2.0f;
         float py = cPos.y + rotY;
         player->SetPosition(Vector2(px, py));
-        player->SetAngle(clawAngle*0.7f);
+        player->SetAngle(clawAngle * 0.7f);
     }
 };

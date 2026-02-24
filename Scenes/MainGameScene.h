@@ -29,6 +29,8 @@ private:
 	void Generate_map(int count);
 	void ShowTime();
 	void StartHandTransition(int pressIndex);
+	void StartIntroTransition();
+	void StartEndTransition();
 
 	Sprite *bck = nullptr;
 	Object *player = nullptr;
@@ -48,6 +50,8 @@ private:
 	int count_presses;
 
 	bool handTransitionActive = false;
+	bool endTransitionActive = false;
+	bool waitingForWin = false;
 	Object *handObj = nullptr;
 	RobotHand *robotHand = nullptr;
 
@@ -55,4 +59,5 @@ private:
 
 	std::chrono::steady_clock::time_point start;
 	std::chrono::steady_clock::time_point last;
+	std::chrono::steady_clock::time_point winTime;
 };

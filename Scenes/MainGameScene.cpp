@@ -36,7 +36,7 @@ void MainGameScene::Init()
 		Object *bck = CreateObject();
 		bck->AddComponent(bckimg);
 		bck->SetLayer(-500);
-		bck->SetPosition(Vector2(bckimg->GetSize().x * i, 0));
+		bck->SetPosition(Vector2(bckimg->GetSize().x * i - 500, 0));
 	}
 	start = std::chrono::steady_clock::now();
 	timerText = new TextComponent(20, "0");
@@ -48,7 +48,7 @@ void MainGameScene::Init()
 	timerObj->SetLayer(100);
 
 	Generate_map(count_presses);
-	//StartHandTransition(0);
+	StartIntroTransition();
 }
 
 void MainGameScene::Generate_map(int count)
@@ -67,7 +67,6 @@ void MainGameScene::Generate_map(int count)
 
 	if (blocks.size() > 0)
 	{
-		blocks[0]->GetComponent<Press>()->SetCurrent(true);
 		sizeOfPress = blocks[0]->GetComponent<Press>()->GetSizePress();
 
 		belt = CreateObject();
@@ -77,7 +76,7 @@ void MainGameScene::Generate_map(int count)
 		ScrollingImage *scrollImg = new ScrollingImage(
 			beltData,
 			-150.0f,
-			300,
+			2300,
 			50);
 		belt->AddComponent(scrollImg);
 		belt->SetLayer(-100);
@@ -86,6 +85,39 @@ void MainGameScene::Generate_map(int count)
 
 void MainGameScene::Update()
 {
+	if (waitingForWin)
+	{
+		auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
+			std::chrono::steady_clock::now() - winTime).count();
+		if (elapsed >= 5)
+			SwitchToScene(new WinScene());
+		return;
+	}
+
+	if (endTransitionActive)
+	{
+		if (robotHand && robotHand->IsCompleted())
+		{
+			robotHand->Cleanup();
+			DeleteObject(handObj);
+			handObj = nullptr;
+			robotHand = nullptr;
+			endTransitionActive = false;
+
+			ScoreBoard *scoreBoard = new ScoreBoard("Assets/statistics.csv");
+			std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+			auto elapsed =
+				std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
+			scoreBoard->addRecord(playerName, elapsed);
+			scoreBoard->saveToFile();
+			waitingForWin = true;
+			winTime = std::chrono::steady_clock::now();
+		}
+		scoreText->setText("Score: " + std::to_string(current_press_num));
+		ShowTime();
+		return;
+	}
+
 	if (handTransitionActive)
 	{
 		if (robotHand && robotHand->IsCompleted())
@@ -127,15 +159,9 @@ void MainGameScene::Update()
 	ShowTime();
 
 	if (current_press_num == count_presses && blocks.size() > 0 &&
-		player->GetPosition().x >= blocks[count_presses - 1]->GetPosition().x + sizeOfPress.x + 1000)
+		belt != nullptr && player->GetPosition().x >= belt->GetPosition().x - 200)
 	{
-		ScoreBoard *scoreBoard = new ScoreBoard("Assets/statistics.csv");
-		std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-		auto elapsed =
-			std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
-		scoreBoard->addRecord(playerName, elapsed);
-		scoreBoard->saveToFile();
-		SwitchToScene(new WinScene());
+		StartEndTransition();
 	}
 	playerComp->SetCar(current_press_num);
 }
@@ -147,6 +173,34 @@ void MainGameScene::StartHandTransition(int pressIndex)
 	robotHand = new RobotHand(player, targetX);
 	handObj->AddComponent(robotHand);
 	handTransitionActive = true;
+}
+
+void MainGameScene::StartIntroTransition()
+{
+	if (blocks.empty()) return;
+	// Place the player off-screen to the left so the carry looks meaningful
+	float startX = blocks[0]->GetPosition().x - 700.0f;
+	player->SetPosition(Vector2(startX, GetWindowSize().y / 2.0f + 50.0f));
+	playerComp->SetFrozen(true);
+
+	float targetX = blocks[0]->GetPosition().x - 300.0f;
+	handObj = CreateObject();
+	robotHand = new RobotHand(player, targetX);
+	handObj->AddComponent(robotHand);
+	handTransitionActive = true;
+}
+
+void MainGameScene::StartEndTransition()
+{
+	if (belt == nullptr) return;
+	// Carry the player onto the conveyor belt
+	float targetX = belt->GetPosition().x + 100.0f;
+	float beltSurfaceY = belt->GetPosition().y;
+	handObj = CreateObject();
+	robotHand = new RobotHand(player, targetX, beltSurfaceY, true);
+	handObj->AddComponent(robotHand);
+	endTransitionActive = true;
+
 }
 
 void MainGameScene::ShowTime()
