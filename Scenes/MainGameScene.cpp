@@ -55,7 +55,8 @@ void MainGameScene::Generate_map(int count)
 	for (int i = 0; i < count; i++)
 	{
 
-		int interval = static_cast<int>(GetWindowSize().y * 0.2f);
+		int interval = static_cast<int>(GetWindowSize().y * 0.2f); 
+		//std::cout << "Interval: " << interval << std::endl;
 		float height_pos = (rand() % (2 * interval)) - interval;
 
 		blocks.push_back(CreateObject());

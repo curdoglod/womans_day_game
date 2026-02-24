@@ -1,6 +1,5 @@
 #include "SceneDeclarations.h"
 
-
 void StartScene::Init()
 {
 	SetWindowSize(1280, 720);
@@ -13,26 +12,29 @@ void StartScene::Init()
 	background->AddComponent(new Image(bck_img));
 	background->SetLayer(-100);
 	Object *inputField = CreateObject();
-	InputFieldComponent *inputComp = new InputFieldComponent(12, "Enter your name",
-			0.0f, TextAlignment::CENTER);
+	InputFieldComponent *inputComp = new InputFieldComponent(20, "Enter your name",
+															 0.0f, TextAlignment::CENTER);
 	if (MainGameScene::GetPlayerName() != "")
 		inputComp->setValue(MainGameScene::GetPlayerName());
 	inputField->AddComponent(new Image(input_img));
 	inputField->AddComponent(inputComp);
 	// inputField->GetComponent<Image>()->SetSize(Vector2(200, 50));
-	inputField->SetPosition(GetWindowSize() / 2
-		- inputField->GetComponent<Image>()->GetSize() / 2);
+	inputField->SetPosition(GetWindowSize() / 2 - inputField->GetComponent<Image>()->GetSize() / 2);
 	inputField->SetPosition(Vector2(406, 397));
-
 	start_button = CreateObject();
-    
 	start_button->AddComponent(new ButtonComponent([this,
-			inputComp]() { SwitchToScene(new MainGameScene(inputComp->getValue())); }));
+													inputComp]()
+												   { SwitchToScene(new MainGameScene(inputComp->getValue())); }));
 	// start_button->AddComponent(new ButtonComponent([this, inputComp]()
 	//                                                { SwitchToScene(new WinScene()); }));
 	startBttn_image = start_button->GetComponent<Image>();
-    startBttn_image->SetNewSprite(button_img);
-    start_button->SetPosition(Vector2(426, 544));
+	startBttn_image->SetNewSprite(button_img);
+	start_button->SetPosition(Vector2(426, 544));
+
+	std::vector<unsigned char> bck_screen_img = Engine::GetResourcesArchive()->GetFile("bckscreen.png");
+	Object *bck_screen = CreateObject();
+	bck_screen->SetLayer(-1000);
+	bck_screen->AddComponent(new Image(bck_screen_img));
 }
 
 void StartScene::onKeyReleased(SDL_Keycode key)

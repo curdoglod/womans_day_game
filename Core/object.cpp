@@ -164,14 +164,12 @@ void Object::UpdateEvents(SDL_Event &event)
 {
 	for (auto &component : components)
 	{
-		int x, y;
-		SDL_GetMouseState(&x, &y);
 		if (event.type == SDL_MOUSEBUTTONDOWN)
-			component->OnMouseButtonDown(Vector2((float)x, (float)y));
+			component->OnMouseButtonDown(Vector2((float)event.button.x, (float)event.button.y));
 		else if (event.type == SDL_MOUSEBUTTONUP)
-			component->OnMouseButtonUp(Vector2((float)x, (float)y));
+			component->OnMouseButtonUp(Vector2((float)event.button.x, (float)event.button.y));
 		else if (event.type == SDL_MOUSEMOTION)
-			component->OnMouseButtonMotion(Vector2((float)x, (float)y));
+			component->OnMouseButtonMotion(Vector2((float)event.motion.x, (float)event.motion.y));
 		else if (event.type == SDL_KEYDOWN)
 			component->onKeyPressed(event.key.keysym.sym);
 		else if (event.type == SDL_KEYUP)

@@ -7,15 +7,28 @@
 #include "SceneManager.h"
 #include <chrono>
 
+
 struct Engine::Impl
 {
 
     void preInit()
     {
-        m_window = SDL_CreateWindow("New Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, 0);
-        m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
-    }
+        // m_window = SDL_CreateWindow("New Window",
+        //                             SDL_WINDOWPOS_CENTERED,
+        //                             SDL_WINDOWPOS_CENTERED,
+        //                             1280, 720,
+        //                             SDL_WINDOW_FULLSCREEN_DESKTOP);
 
+        m_window = SDL_CreateWindow("New Window",
+                                    SDL_WINDOWPOS_CENTERED,
+                                    SDL_WINDOWPOS_CENTERED,
+                                    1280, 720,
+                                    SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+        m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
+
+       SDL_RenderSetLogicalSize(m_renderer, 1280, 720);
+    }
     void Tick(float deltaTime)
     {
 
@@ -32,7 +45,7 @@ struct Engine::Impl
                 currentScene->UpdateEvents(event);
         }
 
-        SDL_SetRenderDrawColor(m_renderer, 0, 100, 255, 255);
+        SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
         SDL_RenderClear(m_renderer);
 
         if (currentScene != nullptr)

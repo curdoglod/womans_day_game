@@ -7,7 +7,7 @@ class Game : public Engine {
 
     void Init() override {
         SetWindowTitle("Game");
-        SetWindowSize(400, 700);
+        SetWindowSize(1280, 720);
         ChangeScene(new StartScene());
      }
 

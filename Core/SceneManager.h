@@ -104,7 +104,10 @@ public:
 
    Vector2 GetWindowSize() {
        int w, h;
-       SDL_GetWindowSize(m_window, &w, &h);
+       SDL_RenderGetLogicalSize(m_renderer, &w, &h);
+       if (w == 0 || h == 0) {
+           SDL_GetWindowSize(m_window, &w, &h);
+       }
        return Vector2((float)w,(float) h);
    }
 

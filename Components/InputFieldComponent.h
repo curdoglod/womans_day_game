@@ -183,13 +183,18 @@ private:
             return upper ? static_cast<char>(toupper(base)) : base;
         }
 
-        if (key >= SDLK_0 && key <= SDLK_9)
+        if (!shift&&key >= SDLK_0 && key <= SDLK_9)
         {
             return static_cast<char>('0' + (key - SDLK_0));
         }
-        if (key == SDLK_SPACE)
-            return ' ';
-
+        if (key == SDLK_7 && shift) 
+        {
+            return '&'; 
+        }
+        if ((key >= SDLK_SPACE && key <= SDLK_SLASH) )
+        {
+            return static_cast<char>( key );
+        }
         return 0;
     }
 };

@@ -3,7 +3,10 @@
 
 void WinScene::Init()
 {
-
+	std::vector<unsigned char> bck_screen_img = Engine::GetResourcesArchive()->GetFile("bckscreen.png");
+	Object* bck_screen = CreateObject();
+    bck_screen->SetLayer(-1000);
+	bck_screen->AddComponent(new Image(bck_screen_img));
     SetWindowSize(1280, 720);
     ScoreBoard *scoreBoard = new ScoreBoard("Assets/statistics.csv");
     // scoreBoard->addRecord("name", 100);
@@ -30,8 +33,8 @@ void WinScene::Init()
             std::string lineText = std::to_string(rank) + ". " + records[i].name + " - " + time;
 
             Object *bannerObj = CreateObject();
-            bannerObj->SetPosition(Vector2(GetWindowSize().x / 2 + 10  , 160));
-            TextComponent *textComp = new TextComponent(36, "", TextAlignment::CENTER);
+            bannerObj->SetPosition(Vector2(GetWindowSize().x / 2 + 40  , 160));
+            TextComponent *textComp = new TextComponent(30, "", TextAlignment::CENTER);
             textComp->SetOutline(2, {0, 0, 0, 255});
             textComp->SetColor(255, 255, 255);
             textComp->setText(lineText);
