@@ -13,7 +13,7 @@ MainGameScene::MainGameScene(const std::string &name)
 void MainGameScene::Init()
 {
 	score = 0;
-	count_presses = 6;
+	count_presses = 1;
 	std::vector<unsigned char> ballImgData = Engine::GetResourcesArchive()->GetFile("ball.png");
 	std::vector<unsigned char> blockImgData = Engine::GetResourcesArchive()->GetFile("block.png");
 	std::vector<unsigned char> bckImgData = Engine::GetResourcesArchive()->GetFile("background.png");
@@ -48,6 +48,7 @@ void MainGameScene::Init()
 	timerObj->SetLayer(100);
 
 	Generate_map(count_presses);
+	//StartHandTransition(0);
 }
 
 void MainGameScene::Generate_map(int count)
@@ -55,8 +56,8 @@ void MainGameScene::Generate_map(int count)
 	for (int i = 0; i < count; i++)
 	{
 
-		int interval = static_cast<int>(GetWindowSize().y * 0.2f); 
-		//std::cout << "Interval: " << interval << std::endl;
+		int interval = static_cast<int>(GetWindowSize().y * 0.2f);
+		// std::cout << "Interval: " << interval << std::endl;
 		float height_pos = (rand() % (2 * interval)) - interval;
 
 		blocks.push_back(CreateObject());
@@ -64,10 +65,22 @@ void MainGameScene::Generate_map(int count)
 		blocks[i]->AddComponent(new Press(player));
 	}
 
-	if(blocks.size() > 0)
+	if (blocks.size() > 0)
 	{
 		blocks[0]->GetComponent<Press>()->SetCurrent(true);
 		sizeOfPress = blocks[0]->GetComponent<Press>()->GetSizePress();
+
+		belt = CreateObject();
+		belt->SetPosition(Vector2(blocks[blocks.size() - 1]->GetPosition().x + sizeOfPress.x + 300, GetWindowSize().y / 1.5f));
+		std::vector<unsigned char>
+			beltData = Engine::GetResourcesArchive()->GetFile("container_belt.png");
+		ScrollingImage *scrollImg = new ScrollingImage(
+			beltData,
+			-150.0f,
+			300,
+			50);
+		belt->AddComponent(scrollImg);
+		belt->SetLayer(-100);
 	}
 }
 
@@ -114,7 +127,7 @@ void MainGameScene::Update()
 	ShowTime();
 
 	if (current_press_num == count_presses && blocks.size() > 0 &&
-		player->GetPosition().x >= blocks[count_presses - 1]->GetPosition().x + sizeOfPress.x + 100)
+		player->GetPosition().x >= blocks[count_presses - 1]->GetPosition().x + sizeOfPress.x + 1000)
 	{
 		ScoreBoard *scoreBoard = new ScoreBoard("Assets/statistics.csv");
 		std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();

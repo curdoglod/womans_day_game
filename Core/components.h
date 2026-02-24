@@ -9,3 +9,4 @@
 #include "../Components/Camera.h"
 #include "../Scenes/Press.h"
 #include "../Components/InputFieldComponent.h"
+#include "../Components/ScrollingImage.h"
