@@ -13,7 +13,7 @@ MainGameScene::MainGameScene(const std::string &name)
 void MainGameScene::Init()
 {
 	score = 0;
-	count_presses = 6;
+	count_presses = 1;
 	std::vector<unsigned char> ballImgData = Engine::GetResourcesArchive()->GetFile("ball.png");
 	std::vector<unsigned char> blockImgData = Engine::GetResourcesArchive()->GetFile("block.png");
 	std::vector<unsigned char> bckImgData = Engine::GetResourcesArchive()->GetFile("background.png");
@@ -80,6 +80,25 @@ void MainGameScene::Generate_map(int count)
 			50);
 		belt->AddComponent(scrollImg);
 		belt->SetLayer(-100);
+
+		std::vector<unsigned char>
+			beltPartData = Engine::GetResourcesArchive()->GetFile("part_belt.png");
+		Object *belt_part = CreateObject();
+		belt_part->SetPosition(Vector2(belt->GetPosition().x - 10 , belt->GetPosition().y -3));
+		Image *beltPartImg = new Image(beltPartData);
+		belt_part->AddComponent(beltPartImg);
+		belt_part->SetLayer(-101);
+		
+		for (int i = 0; i < 20; i++)
+		{
+			Object *belt_support = CreateObject();
+			belt_support->SetPosition(Vector2(blocks[blocks.size() - 1]->GetPosition().x + sizeOfPress.x + 700 + i * 360 - belt_part->GetSize().x+ 5, GetWindowSize().y / 1.5f + 50));
+			std::vector<unsigned char>
+				beltSupportData = Engine::GetResourcesArchive()->GetFile("supports_belt.png");
+			Image *beltSupportImg = new Image(beltSupportData);
+			belt_support->AddComponent(beltSupportImg);
+			belt_support->SetLayer(-99);
+		}
 	}
 }
 
@@ -88,7 +107,8 @@ void MainGameScene::Update()
 	if (waitingForWin)
 	{
 		auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
-			std::chrono::steady_clock::now() - winTime).count();
+						   std::chrono::steady_clock::now() - winTime)
+						   .count();
 		if (elapsed >= 5)
 			SwitchToScene(new WinScene());
 		return;
@@ -177,7 +197,8 @@ void MainGameScene::StartHandTransition(int pressIndex)
 
 void MainGameScene::StartIntroTransition()
 {
-	if (blocks.empty()) return;
+	if (blocks.empty())
+		return;
 	// Place player at carry height — hand appears already holding them
 	float startX = blocks[0]->GetPosition().x - 600.0f;
 	player->SetPosition(Vector2(startX, GetWindowSize().y / 2.0f + 50.0f));
@@ -191,7 +212,8 @@ void MainGameScene::StartIntroTransition()
 
 void MainGameScene::StartEndTransition()
 {
-	if (belt == nullptr) return;
+	if (belt == nullptr)
+		return;
 	// Carry the player onto the conveyor belt
 	float targetX = belt->GetPosition().x + 100.0f;
 	float beltSurfaceY = belt->GetPosition().y;
@@ -199,7 +221,6 @@ void MainGameScene::StartEndTransition()
 	robotHand = new RobotHand(player, targetX, beltSurfaceY, true);
 	handObj->AddComponent(robotHand);
 	endTransitionActive = true;
-
 }
 
 void MainGameScene::ShowTime()
