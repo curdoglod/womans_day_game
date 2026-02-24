@@ -19,8 +19,8 @@ public:
         DONE
     };
 
-    RobotHand(Object *_player, float _targetX, float _groundY = -1.0f, bool _keepFrozen = false)
-        : player(_player), targetX(_targetX), customGroundY(_groundY), keepFrozen(_keepFrozen) {}
+    RobotHand(Object *_player, float _targetX, float _groundY = -1.0f, bool _keepFrozen = false, Phase _startPhase = Phase::DESCEND)
+        : player(_player), targetX(_targetX), customGroundY(_groundY), keepFrozen(_keepFrozen), startPhase(_startPhase) {}
 
     void Init() override
     {
@@ -56,7 +56,26 @@ public:
         liftY = 50.0f;
         groundY = (customGroundY > 0.0f) ? customGroundY : object->GetScene()->GetWindowSize().y / 2 + 50;
 
-        phase = Phase::DESCEND;
+        if (startPhase == Phase::CARRY)
+        {
+            // Start with player already in the claw at carry height
+            player->GetComponent<PaddleComponent>()->SetFrozen(true);
+            Vector2 clawAtLift = clawPosForPlayerPos(playerPos);
+            clawObj->SetPosition(Vector2(clawAtLift.x, liftY));
+            clawObj->SetAngle(baseClawAngle);
+            armObj->SetAngle(baseArmAngle);
+            updateArmPosition();
+            syncPlayerToClaw();
+            phase = Phase::CARRY;
+        }
+        else
+        {
+            clawObj->SetPosition(Vector2(clawStart.x, -clawSize.y));
+            clawObj->SetAngle(baseClawAngle);
+            armObj->SetAngle(baseArmAngle);
+            updateArmPosition();
+            phase = Phase::DESCEND;
+        }
     }
 
     void update(float deltaTime) override
@@ -238,6 +257,7 @@ private:
     float targetX;
     float customGroundY = -1.0f;
     bool keepFrozen = false;
+    Phase startPhase = Phase::DESCEND;
 
     Object *clawObj = nullptr;
     Object *armObj = nullptr;
@@ -248,9 +268,9 @@ private:
 
     float grabY, liftY, groundY;
 
-    const float descendSpeed = 3.5f;
-    const float liftSpeed = 3.0f;
-    const float carrySpeed = 5.0f;
+    const float descendSpeed = 5.5f;
+    const float liftSpeed = 5.0f;
+    const float carrySpeed = 7.0f;
 
     float baseArmAngle = 0.0f;
     float baseClawAngle = 40.0f;

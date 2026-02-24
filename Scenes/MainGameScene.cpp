@@ -13,7 +13,7 @@ MainGameScene::MainGameScene(const std::string &name)
 void MainGameScene::Init()
 {
 	score = 0;
-	count_presses = 1;
+	count_presses = 6;
 	std::vector<unsigned char> ballImgData = Engine::GetResourcesArchive()->GetFile("ball.png");
 	std::vector<unsigned char> blockImgData = Engine::GetResourcesArchive()->GetFile("block.png");
 	std::vector<unsigned char> bckImgData = Engine::GetResourcesArchive()->GetFile("background.png");
@@ -70,7 +70,7 @@ void MainGameScene::Generate_map(int count)
 		sizeOfPress = blocks[0]->GetComponent<Press>()->GetSizePress();
 
 		belt = CreateObject();
-		belt->SetPosition(Vector2(blocks[blocks.size() - 1]->GetPosition().x + sizeOfPress.x + 300, GetWindowSize().y / 1.5f));
+		belt->SetPosition(Vector2(blocks[blocks.size() - 1]->GetPosition().x + sizeOfPress.x + 700, GetWindowSize().y / 1.5f));
 		std::vector<unsigned char>
 			beltData = Engine::GetResourcesArchive()->GetFile("container_belt.png");
 		ScrollingImage *scrollImg = new ScrollingImage(
@@ -159,7 +159,7 @@ void MainGameScene::Update()
 	ShowTime();
 
 	if (current_press_num == count_presses && blocks.size() > 0 &&
-		belt != nullptr && player->GetPosition().x >= belt->GetPosition().x - 200)
+		belt != nullptr && player->GetPosition().x >= belt->GetPosition().x - 800)
 	{
 		StartEndTransition();
 	}
@@ -178,14 +178,13 @@ void MainGameScene::StartHandTransition(int pressIndex)
 void MainGameScene::StartIntroTransition()
 {
 	if (blocks.empty()) return;
-	// Place the player off-screen to the left so the carry looks meaningful
-	float startX = blocks[0]->GetPosition().x - 700.0f;
+	// Place player at carry height — hand appears already holding them
+	float startX = blocks[0]->GetPosition().x - 600.0f;
 	player->SetPosition(Vector2(startX, GetWindowSize().y / 2.0f + 50.0f));
-	playerComp->SetFrozen(true);
 
 	float targetX = blocks[0]->GetPosition().x - 300.0f;
 	handObj = CreateObject();
-	robotHand = new RobotHand(player, targetX);
+	robotHand = new RobotHand(player, targetX, -1.0f, false, RobotHand::Phase::CARRY);
 	handObj->AddComponent(robotHand);
 	handTransitionActive = true;
 }
