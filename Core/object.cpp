@@ -142,12 +142,11 @@ void Object::RemoveComponent()
 
 void Object::update(float deltaTime)
 {
+	this->deltatime = deltaTime;
 	for (auto &component : components)
 	{
-		component->Update();
 		component->update(deltaTime);
 	}
-	this->deltatime = deltaTime;
 }
 
 SceneManager *Object::GetScene() const

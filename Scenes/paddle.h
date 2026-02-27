@@ -14,7 +14,7 @@ public:
 
     void onKeyReleased(SDL_Keycode key) override;
 
-    void Update() override;
+    void update(float deltaTime) override;
 
     void SetBump(bool _bump);
 

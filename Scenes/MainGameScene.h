@@ -23,8 +23,6 @@ public:
 		return playerName;
 	}
 
-	static int currId;
-
 private:
 	void Generate_map(int count);
 	void ShowTime();

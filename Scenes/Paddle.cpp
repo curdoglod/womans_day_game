@@ -45,7 +45,7 @@ void PaddleComponent::onKeyReleased(SDL_Keycode key)
     }
 }
 
-void PaddleComponent::Update()
+void PaddleComponent::update(float deltaTime)
 {
     if (_frozen || object == nullptr)
         return;

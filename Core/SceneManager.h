@@ -134,7 +134,7 @@ public:
 
 private: 
     std::vector<Object*> objects;
-    Camera* camera; 
+    Camera* camera = nullptr;
     SDL_Renderer* m_renderer;
     SDL_Window* m_window;
     Engine* m_engine;

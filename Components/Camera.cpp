@@ -3,7 +3,7 @@
 #include "../Core/SceneManager.h" 
 #include "../Core/object.h"
 
-Camera::Camera(): position(0,0), offset(400,0) {}
+Camera::Camera(): position(0,0), offset(400,0), active(false) {}
 
 void Camera::Init()
 {
@@ -11,7 +11,7 @@ void Camera::Init()
     active = true; 
 }
 
-void Camera::Update()
+void Camera::update(float deltaTime)
 {
     if(!active) return;
 
