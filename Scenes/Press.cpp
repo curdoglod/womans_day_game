@@ -46,11 +46,13 @@ void Press::update(float deltaTime)
             if (player->Crossing(downPart, 0.8f, 1.0f))
             {
                 player->GetComponent<PaddleComponent>()->SetStoped();
+                player->GetComponent<PaddleComponent>()->SetBump(true);
                 player->MoveY(-1 * speed_closing);
             }
             else if (player->Crossing(upPart, 0.8f, 1.0f))
             {
                 player->GetComponent<PaddleComponent>()->SetStoped();
+                player->GetComponent<PaddleComponent>()->SetBump(true);
                 player->MoveY(1 * speed_closing);
             }
         }
@@ -68,12 +70,14 @@ void Press::update(float deltaTime)
             if (player->Crossing(downPart, 0.8f, 1.0f))
             {
                 player->GetComponent<PaddleComponent>()->SetStoped();
+                player->GetComponent<PaddleComponent>()->SetBump(true);
                 player->MoveY(1 * speed_closing);
                 // std::cout<<"crossing\n";
             }
             else if (player->Crossing(upPart, 0.8f, 1.0f))
             {
                 player->GetComponent<PaddleComponent>()->SetStoped();
+                player->GetComponent<PaddleComponent>()->SetBump(true);
                 player->MoveY(-1 * speed_closing);
             }
         }
@@ -85,7 +89,7 @@ void Press::update(float deltaTime)
 
     if (current_blocks)
     {
-        if (player->Crossing(upPart) || player->Crossing(downPart))
+        if (player->Crossing(upPart, 0.85f, 0.85f) || player->Crossing(downPart, 0.85f, 0.85f))
         {
             player->GetComponent<PaddleComponent>()->SetBump(true);
             // std::cout<<"crossing\n";
