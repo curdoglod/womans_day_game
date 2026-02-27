@@ -93,16 +93,13 @@ public:
         {
         case Phase::DESCEND:
         {
-            // Целевая позиция клешни — из текущей позиции игрока
             Vector2 targetClawPos = clawPosForPlayerPos(player->GetPosition());
 
-            // Плавно обновляем grabY
             if (targetClawPos.y < grabY)
                 grabY = targetClawPos.y;
             else
                 grabY += (targetClawPos.y - grabY) * 0.05f * dt;
 
-            // Плавно следим за игроком по X
             clawPos.x += (targetClawPos.x - clawPos.x) * 0.1f * dt;
             clawPos.y += descendSpeed * dt;
             clawObj->SetPosition(clawPos);
@@ -211,8 +208,11 @@ public:
                     player->GetComponent<PaddleComponent>()->SetFrozen(false);
                 else
                 {
-                    player->GetComponent<Rigidbody>()->setVelocity(Vector2(60, 0)); 
+                    player->GetComponent<Rigidbody>()->setVelocity(Vector2(250, 0));
                 }
+                if (keepFrozen)
+                    player->GetComponent<PaddleComponent>()->GetCamera()->setActive(false);
+
                 player->SetAngle(0);
                 phase = Phase::RETREAT;
             }

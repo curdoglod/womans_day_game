@@ -13,17 +13,24 @@ MainGameScene::MainGameScene(const std::string &name)
 void MainGameScene::Init()
 {
 	score = 0;
-	count_presses = 1;
-	std::vector<unsigned char> ballImgData = Engine::GetResourcesArchive()->GetFile("ball.png");
-	std::vector<unsigned char> blockImgData = Engine::GetResourcesArchive()->GetFile("block.png");
+	count_presses = 6;
+	std::vector<unsigned char> panelImgData = Engine::GetResourcesArchive()->GetFile("panel.png");
 	std::vector<unsigned char> bckImgData = Engine::GetResourcesArchive()->GetFile("background.png");
+
+	Object *panel = CreateObject();
+	Image *panelImg = new Image(panelImgData);
+	panel->AddComponent(panelImg);
+	panel->SetLayer(1000);
+	panel->SetPosition(Vector2(10, 10));
+	panel->FixedCamera(true);
 
 	scoreText = new TextComponent(20, "Score:" + std::to_string(score));
 	scoreObj = CreateObject();
 	scoreObj->AddComponent(scoreText);
-	scoreObj->SetPosition(Vector2(30, 40));
-	scoreText->SetColor(255, 255, 255);
-	scoreObj->SetLayer(100);
+	scoreObj->SetLayer(1001);
+	scoreObj->SetPosition(Vector2(50, 100));
+	scoreText->SetColor(125, 220, 93);
+	scoreText->SetFont(Engine::GetResourcesArchive()->GetFile("Orbitron.ttf"));
 
 	player = CreateObject();
 	playerComp = new PaddleComponent();
@@ -40,12 +47,14 @@ void MainGameScene::Init()
 	}
 	start = std::chrono::steady_clock::now();
 	timerText = new TextComponent(20, "0");
-	timerText->SetColor(255, 255, 255);
+	timerText->SetColor(125, 220, 93);
+	timerText->SetFont(Engine::GetResourcesArchive()->GetFile("Orbitron.ttf"));
+
 	timerObj = CreateObject();
 	timerObj->AddComponent(timerText);
-	timerObj->SetPosition(Vector2(30, 15));
+	timerObj->SetPosition(Vector2(130, 64));
 
-	timerObj->SetLayer(100);
+	timerObj->SetLayer(1001);
 
 	Generate_map(count_presses);
 	StartIntroTransition();
@@ -75,7 +84,7 @@ void MainGameScene::Generate_map(int count)
 			beltData = Engine::GetResourcesArchive()->GetFile("container_belt.png");
 		ScrollingImage *scrollImg = new ScrollingImage(
 			beltData,
-			-150.0f,
+			-329.0f,
 			2300,
 			50);
 		belt->AddComponent(scrollImg);
@@ -84,15 +93,15 @@ void MainGameScene::Generate_map(int count)
 		std::vector<unsigned char>
 			beltPartData = Engine::GetResourcesArchive()->GetFile("part_belt.png");
 		Object *belt_part = CreateObject();
-		belt_part->SetPosition(Vector2(belt->GetPosition().x - 10 , belt->GetPosition().y -3));
+		belt_part->SetPosition(Vector2(belt->GetPosition().x - 10, belt->GetPosition().y - 3));
 		Image *beltPartImg = new Image(beltPartData);
 		belt_part->AddComponent(beltPartImg);
 		belt_part->SetLayer(-101);
-		
+
 		for (int i = 0; i < 20; i++)
 		{
 			Object *belt_support = CreateObject();
-			belt_support->SetPosition(Vector2(blocks[blocks.size() - 1]->GetPosition().x + sizeOfPress.x + 700 + i * 360 - belt_part->GetSize().x+ 5, GetWindowSize().y / 1.5f + 50));
+			belt_support->SetPosition(Vector2(blocks[blocks.size() - 1]->GetPosition().x + sizeOfPress.x + 700 + i * 360 - belt_part->GetSize().x + 5, GetWindowSize().y / 1.5f + 50));
 			std::vector<unsigned char>
 				beltSupportData = Engine::GetResourcesArchive()->GetFile("supports_belt.png");
 			Image *beltSupportImg = new Image(beltSupportData);
@@ -104,12 +113,13 @@ void MainGameScene::Generate_map(int count)
 
 void MainGameScene::Update()
 {
+
 	if (waitingForWin)
 	{
-		auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
+		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
 						   std::chrono::steady_clock::now() - winTime)
 						   .count();
-		if (elapsed >= 5)
+		if (elapsed >= 2400)
 			SwitchToScene(new WinScene());
 		return;
 	}
@@ -190,7 +200,7 @@ void MainGameScene::StartHandTransition(int pressIndex)
 {
 	float targetX = blocks[pressIndex + 1]->GetPosition().x - 350;
 	handObj = CreateObject();
-	robotHand = new RobotHand(player, targetX);
+	robotHand = new RobotHand(player, targetX, GetWindowSize().y / 2, false);
 	handObj->AddComponent(robotHand);
 	handTransitionActive = true;
 }
@@ -238,6 +248,7 @@ void MainGameScene::ShowTime()
 		(seconds < 10 ? "0" : "") + std::to_string(seconds);
 
 	timerText->setText(time);
+	scoreText->setText("Score: " + std::to_string(current_press_num));
 }
 
 void MainGameScene::onKeyReleased(SDL_Keycode key)

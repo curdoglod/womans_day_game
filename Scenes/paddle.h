@@ -24,7 +24,8 @@ public:
 
     void SetFrozen(bool frozen);
     bool IsFrozen() const { return _frozen; }
-
+    Camera* GetCamera() const { return camera; }
+    
 private:
     Rigidbody *_rigidbody;
     Vector2 windowSize;

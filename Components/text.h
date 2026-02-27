@@ -42,6 +42,27 @@ public:
 
     }
 
+    void SetFont(std::vector<unsigned char>  _fontDataBuffer) {
+        if (font) {
+            TTF_CloseFont(font);
+            font = nullptr;
+        }
+
+        SDL_RWops* rw = SDL_RWFromConstMem(_fontDataBuffer.data(), _fontDataBuffer.size());
+        if (!rw) {
+            std::cerr << "Failed to create SDL_RWops for font data." << std::endl;
+            return;
+        }
+
+        font = TTF_OpenFontRW(rw, 1, fontSize);
+        if (!font) {
+            std::cerr << "Failed to load font from data buffer: " << TTF_GetError() << std::endl;
+            SDL_RWclose(rw);
+            return;
+        }
+
+        UpdateTextures();
+    }
     /**
     Text
    */

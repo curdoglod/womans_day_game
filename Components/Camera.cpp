@@ -8,10 +8,13 @@ Camera::Camera(): position(0,0), offset(400,0) {}
 void Camera::Init()
 {
     object->GetScene()->SetCamera(this);
+    active = true; 
 }
 
 void Camera::Update()
 {
+    if(!active) return;
+
     if((object->GetPosition().x - position.x) > offset.x)
          position = Vector2(object->GetPosition().x, 0) - offset; 
     else 
