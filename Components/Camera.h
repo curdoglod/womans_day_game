@@ -11,7 +11,7 @@ public:
 
     void Init() override; 
 
-    void Update() override;
+    void update(float deltaTime) override;
 
     void setPosition(const Vector2& v) { position = v; }
     void setOffset(const Vector2& v) { offset = v; }

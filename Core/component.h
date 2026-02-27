@@ -11,8 +11,6 @@ public:
 
     virtual void Init() {}
 
-    virtual void Update() {
-    }
     virtual void update(float deltaTime) {
     }
  

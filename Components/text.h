@@ -148,25 +148,24 @@ public:
             SDL_Rect renderQuad = { 0, 0, 0, 0 };
             SDL_QueryTexture(texture, NULL, NULL, &renderQuad.w, &renderQuad.h);
 
-           
             Vector2 spriteSize = object->GetSize();
+            Vector2 pos = object->GetPosition();
+            if (!object->isFixedCamera())
+                pos = pos - object->GetScene()->GetCameraPosition();
 
-            //std :: cout << object->GetSize() <<std::endl; 
-      
             switch (alignment) {
             case TextAlignment::LEFT:
-                renderQuad.x = object->GetPosition().x + offsetX;
+                renderQuad.x = (int)(pos.x + offsetX);
                 break;
             case TextAlignment::CENTER:
-                renderQuad.x = object->GetPosition().x - renderQuad.w / 2 + spriteSize.x / 2 + offsetX;
+                renderQuad.x = (int)(pos.x - renderQuad.w / 2 + spriteSize.x / 2 + offsetX);
                 break;
             case TextAlignment::RIGHT:
-                renderQuad.x = object->GetPosition().x + spriteSize.x -  renderQuad.w + offsetX;
+                renderQuad.x = (int)(pos.x + spriteSize.x - renderQuad.w + offsetX);
                 break;
             }
 
-     
-            renderQuad.y = object->GetPosition().y + (spriteSize.y - renderQuad.h) / 2 + offsetY;
+            renderQuad.y = (int)(pos.y + (spriteSize.y - renderQuad.h) / 2 + offsetY);
 
             if (outlineTexture && outlineSize > 0) {
                 SDL_Rect outlineQuad = renderQuad;

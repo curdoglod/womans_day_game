@@ -28,7 +28,7 @@ void Press::Init()
     downPart->SetPosition(Vector2(object->GetPosition().x, (object->GetScene()->GetWindowSize().y - 200) + object->GetPosition().y));
 }
 
-void Press::Update()
+void Press::update(float deltaTime)
 {
     float currentDistance =
         downPart->GetPosition().y -

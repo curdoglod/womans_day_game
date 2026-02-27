@@ -11,7 +11,7 @@ public:
 
     void Init() override; 
 
-    void Update() override;
+    void update(float deltaTime) override;
 
     void onKeyReleased(SDL_Keycode key) override; 
     void SlowDown();

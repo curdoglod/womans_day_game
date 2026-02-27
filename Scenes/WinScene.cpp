@@ -8,24 +8,18 @@ void WinScene::Init()
     bck_screen->SetLayer(-1000);
 	bck_screen->AddComponent(new Image(bck_screen_img));
     SetWindowSize(1280, 720);
-    ScoreBoard *scoreBoard = new ScoreBoard("Assets/statistics.csv");
-    // scoreBoard->addRecord("name", 100);
-    // scoreBoard->saveToFile();
+    ScoreBoard *scoreBoard = new ScoreBoard(ScoreBoard::DEFAULT_PATH);
     std::vector<unsigned char> winImgData = Engine::GetResourcesArchive()->GetFile("win_screen_v2.png");
 
-    Object* win_screen = CreateObject(); 
-    win_screen->AddComponent(new Image(winImgData)); 
+    Object* win_screen = CreateObject();
+    win_screen->AddComponent(new Image(winImgData));
 
- 
     const auto &records = scoreBoard->getRecords();
-
-    const std::string &playerName = MainGameScene::GetPlayerName();
-    MainGameScene::currId = scoreBoard->getLastId(); 
-    //std::cout<<MainGameScene::currId << std::endl; 
+    currId_ = scoreBoard->getLastId();
 
     // Find and show current run in the gold banner
     for (size_t i = 0; i < records.size(); ++i) {
-        if (records[i].id == MainGameScene::currId) {
+        if (records[i].id == currId_) {
             int minutes = static_cast<int>(records[i].time / 60);
             int seconds = static_cast<int>(records[i].time % 60);
             std::string time = (minutes < 10 ? "0" : "") + std::to_string(minutes) + ":" + (seconds < 10 ? "0" : "") + std::to_string(seconds);
@@ -33,7 +27,7 @@ void WinScene::Init()
             std::string lineText = std::to_string(rank) + ". " + records[i].name + " - " + time;
 
             Object *bannerObj = CreateObject();
-            bannerObj->SetPosition(Vector2(GetWindowSize().x / 2 + 40  , 160));
+            bannerObj->SetPosition(Vector2(GetWindowSize().x / 2 + 40, 160));
             TextComponent *textComp = new TextComponent(30, "", TextAlignment::CENTER);
             textComp->SetOutline(2, {0, 0, 0, 255});
             textComp->SetColor(255, 255, 255);
@@ -47,22 +41,14 @@ void WinScene::Init()
     for (size_t i = 0; i < records.size() && i < 10; ++i)
         top10Idx.push_back(i);
     ShowTable(records, top10Idx, 0);
-
-    // We no longer show the player record at the bottom if it's below top 10
-    // std::vector<size_t> playerIdx;
-    // for (size_t i = 11; i < records.size(); ++i)
-    // {
-    //     if (MainGameScene::currId == records[i].id)
-    //         playerIdx.push_back(i);
-    // }
-    // ShowTable(records, playerIdx, top10Idx.size());
+    delete scoreBoard;
 }
 
 void WinScene::ShowTable(const std::vector<PlayerRecord> &allRecords,
                          const std::vector<size_t> &indices,
                          int posY)
 {
-    float rowHeight =88.0f;
+    const float rowHeight = 88.0f;
     for (size_t row = 0; row < indices.size(); ++row)
     {
         size_t idx = indices[row];
@@ -79,29 +65,26 @@ void WinScene::ShowTable(const std::vector<PlayerRecord> &allRecords,
         std::string lineText =
             std::to_string(rank) + ". " + rec.name + " - " + time;
 
-        float posX = (row < 5) ? 125.0f : 685.0f; 
-        if(row == 5) rowHeight = 88.0f;
-        rowHeight--; 
+        float posX = (row < 5) ? 125.0f : 685.0f;
         float startY = 315.0f;
-        
+
         Object *rowObj = CreateObject();
         rowObj->SetPosition(Vector2(posX, startY + (row % 5) * rowHeight));
 
         TextComponent *textComp =
             new TextComponent(28, "", TextAlignment::LEFT);
-        textComp->SetOutline(2, {0, 0, 0, 255}); // Add black outline for better contrast
+        textComp->SetOutline(2, {0, 0, 0, 255});
         rowObj->AddComponent(textComp);
 
-        if (rec.name == MainGameScene::GetPlayerName()) 
+        if (rec.name == playerName_)
         {
-            if(MainGameScene::currId == rec.id) 
-                textComp->SetColor(255, 215, 0); // Gold for the current run if it happens to be in top 10
-            else 
+            if (currId_ == rec.id)
+                textComp->SetColor(255, 215, 0);   // Gold for the current run
+            else
                 textComp->SetColor(200, 150, 255); // Soft purple for player's other top 10 runs
         }
         else
             textComp->SetColor(255, 255, 255); // White for other players
-       
 
         textComp->setText(lineText);
     }

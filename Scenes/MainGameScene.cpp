@@ -29,6 +29,7 @@ void MainGameScene::Init()
 	scoreObj->AddComponent(scoreText);
 	scoreObj->SetLayer(1001);
 	scoreObj->SetPosition(Vector2(50, 100));
+	scoreObj->FixedCamera(true);
 	scoreText->SetColor(125, 220, 93);
 	scoreText->SetFont(Engine::GetResourcesArchive()->GetFile("Orbitron.ttf"));
 
@@ -120,7 +121,7 @@ void MainGameScene::Update()
 						   std::chrono::steady_clock::now() - winTime)
 						   .count();
 		if (elapsed >= 2400)
-			SwitchToScene(new WinScene());
+			SwitchToScene(new WinScene(playerName));
 		return;
 	}
 
@@ -134,7 +135,7 @@ void MainGameScene::Update()
 			robotHand = nullptr;
 			endTransitionActive = false;
 
-			ScoreBoard *scoreBoard = new ScoreBoard("Assets/statistics.csv");
+			ScoreBoard *scoreBoard = new ScoreBoard(ScoreBoard::DEFAULT_PATH);
 			std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
 			auto elapsed =
 				std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
@@ -268,4 +269,3 @@ void MainGameScene::onKeyReleased(SDL_Keycode key)
 }
 
 std::string MainGameScene::playerName = "";
-int MainGameScene::currId = 0;

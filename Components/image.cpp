@@ -6,10 +6,12 @@
 
 void Image::update(float deltaTime)
 {
-    if (sprite != nullptr && !object->isFixedCamera())
+    if (sprite == nullptr) return;
+
+    if (!object->isFixedCamera())
         sprite->draw(object->GetPosition() - object->GetScene()->GetCameraPosition());
-    else 
-        sprite->draw(object->GetPosition()); 
-        
-    sprite->setAngle(object->GetAngle()); 
+    else
+        sprite->draw(object->GetPosition());
+
+    sprite->setAngle(object->GetAngle());
 }

@@ -15,6 +15,8 @@ struct PlayerRecord
 class ScoreBoard
 {
 public:
+    static constexpr const char *DEFAULT_PATH = "Assets/statistics.csv";
+
     explicit ScoreBoard(const std::string &fileName)
         : fileName_(fileName), nextId_(0)
     {
