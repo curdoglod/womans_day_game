@@ -23,7 +23,7 @@ struct Engine::Impl
                                     SDL_WINDOWPOS_CENTERED,
                                     SDL_WINDOWPOS_CENTERED,
                                     1280, 720,
-                                    0);
+                                    SDL_WINDOW_FULLSCREEN_DESKTOP);
 
         m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
 

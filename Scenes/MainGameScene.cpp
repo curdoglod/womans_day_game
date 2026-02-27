@@ -24,7 +24,7 @@ void MainGameScene::Init()
 	panel->SetPosition(Vector2(10, 10));
 	panel->FixedCamera(true);
 
-	scoreText = new TextComponent(20, "Score:" + std::to_string(score));
+	scoreText = new TextComponent(20, "Level: " + std::to_string(score));
 	scoreObj = CreateObject();
 	scoreObj->AddComponent(scoreText);
 	scoreObj->SetLayer(1001);
@@ -48,13 +48,13 @@ void MainGameScene::Init()
 	start = std::chrono::steady_clock::now();
 	timerText = new TextComponent(20, "0");
 	timerText->SetColor(125, 220, 93);
-	timerText->SetFont(Engine::GetResourcesArchive()->GetFile("Orbitron.ttf"));
 
 	timerObj = CreateObject();
 	timerObj->AddComponent(timerText);
-	timerObj->SetPosition(Vector2(130, 64));
+	timerObj->SetPosition(Vector2(121, 63));
 
 	timerObj->SetLayer(1001);
+	timerText->SetFont(Engine::GetResourcesArchive()->GetFile("Orbitron.ttf"));
 
 	Generate_map(count_presses);
 	StartIntroTransition();
@@ -143,7 +143,6 @@ void MainGameScene::Update()
 			waitingForWin = true;
 			winTime = std::chrono::steady_clock::now();
 		}
-		scoreText->setText("Score: " + std::to_string(current_press_num));
 		ShowTime();
 		return;
 	}
@@ -161,7 +160,6 @@ void MainGameScene::Update()
 			if (current_press_num < (int)blocks.size())
 				blocks[current_press_num]->GetComponent<Press>()->SetCurrent(true);
 		}
-		scoreText->setText("Score: " + std::to_string(current_press_num));
 		ShowTime();
 		return;
 	}
@@ -185,7 +183,6 @@ void MainGameScene::Update()
 		}
 	}
 
-	scoreText->setText("Score: " + std::to_string(current_press_num));
 	ShowTime();
 
 	if (current_press_num == count_presses && blocks.size() > 0 &&
@@ -194,6 +191,8 @@ void MainGameScene::Update()
 		StartEndTransition();
 	}
 	playerComp->SetCar(current_press_num);
+	char score_ch = '0' + current_press_num;
+	scoreText->setText("Level: " + std::string(1, score_ch));
 }
 
 void MainGameScene::StartHandTransition(int pressIndex)
@@ -248,7 +247,7 @@ void MainGameScene::ShowTime()
 		(seconds < 10 ? "0" : "") + std::to_string(seconds);
 
 	timerText->setText(time);
-	scoreText->setText("Score: " + std::to_string(current_press_num));
+	scoreText->setText("Level: " + std::to_string(current_press_num));
 }
 
 void MainGameScene::onKeyReleased(SDL_Keycode key)
