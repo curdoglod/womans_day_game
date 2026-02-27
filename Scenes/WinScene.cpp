@@ -3,25 +3,28 @@
 
 void WinScene::Init()
 {
-	std::vector<unsigned char> bck_screen_img = Engine::GetResourcesArchive()->GetFile("bckscreen.png");
-	Object* bck_screen = CreateObject();
+    std::vector<unsigned char> bck_screen_img = Engine::GetResourcesArchive()->GetFile("bckscreen.png");
+    Object *bck_screen = CreateObject();
     bck_screen->SetLayer(-1000);
-	bck_screen->AddComponent(new Image(bck_screen_img));
+    bck_screen->AddComponent(new Image(bck_screen_img));
     SetWindowSize(1280, 720);
     ScoreBoard *scoreBoard = new ScoreBoard(ScoreBoard::DEFAULT_PATH);
     std::vector<unsigned char> winImgData = Engine::GetResourcesArchive()->GetFile("win_screen_v2.png");
 
-    Object* win_screen = CreateObject();
+    Object *win_screen = CreateObject();
     win_screen->AddComponent(new Image(winImgData));
 
     const auto &records = scoreBoard->getRecords();
     currId_ = scoreBoard->getLastId();
 
     // Find and show current run in the gold banner
-    for (size_t i = 0; i < records.size(); ++i) {
-        if (records[i].id == currId_) {
+    for (size_t i = 0; i < records.size(); ++i)
+    {
+        if (records[i].id == currId_)
+        {
             int minutes = static_cast<int>(records[i].time / 60);
             int seconds = static_cast<int>(records[i].time % 60);
+
             std::string time = (minutes < 10 ? "0" : "") + std::to_string(minutes) + ":" + (seconds < 10 ? "0" : "") + std::to_string(seconds);
             int rank = static_cast<int>(i) + 1;
             std::string lineText = std::to_string(rank) + ". " + records[i].name + " - " + time;
@@ -48,7 +51,7 @@ void WinScene::ShowTable(const std::vector<PlayerRecord> &allRecords,
                          const std::vector<size_t> &indices,
                          int posY)
 {
-    const float rowHeight = 88.0f;
+    float rowHeight = 88.0f;
     for (size_t row = 0; row < indices.size(); ++row)
     {
         size_t idx = indices[row];
@@ -67,6 +70,9 @@ void WinScene::ShowTable(const std::vector<PlayerRecord> &allRecords,
 
         float posX = (row < 5) ? 125.0f : 685.0f;
         float startY = 315.0f;
+        if (row == 5)
+            rowHeight = 88.0f;
+        rowHeight--;
 
         Object *rowObj = CreateObject();
         rowObj->SetPosition(Vector2(posX, startY + (row % 5) * rowHeight));
@@ -79,7 +85,7 @@ void WinScene::ShowTable(const std::vector<PlayerRecord> &allRecords,
         if (rec.name == playerName_)
         {
             if (currId_ == rec.id)
-                textComp->SetColor(255, 215, 0);   // Gold for the current run
+                textComp->SetColor(255, 215, 0); // Gold for the current run
             else
                 textComp->SetColor(200, 150, 255); // Soft purple for player's other top 10 runs
         }
@@ -92,6 +98,6 @@ void WinScene::ShowTable(const std::vector<PlayerRecord> &allRecords,
 
 void WinScene::onKeyReleased(SDL_Keycode key)
 {
-	if (key == SDLK_ESCAPE)
-		SwitchToScene(new StartScene());
+    if (key == SDLK_ESCAPE)
+        SwitchToScene(new StartScene());
 }

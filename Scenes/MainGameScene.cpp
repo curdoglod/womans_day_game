@@ -56,6 +56,7 @@ void MainGameScene::Init()
 
 	timerObj->SetLayer(1001);
 	timerText->SetFont(Engine::GetResourcesArchive()->GetFile("Orbitron.ttf"));
+	timerObj->FixedCamera(true);
 
 	Generate_map(count_presses);
 	StartIntroTransition();
@@ -192,8 +193,7 @@ void MainGameScene::Update()
 		StartEndTransition();
 	}
 	playerComp->SetCar(current_press_num);
-	char score_ch = '0' + current_press_num;
-	scoreText->setText("Level: " + std::string(1, score_ch));
+	scoreText->setText("Level: " + std::to_string(current_press_num));
 }
 
 void MainGameScene::StartHandTransition(int pressIndex)
@@ -248,7 +248,6 @@ void MainGameScene::ShowTime()
 		(seconds < 10 ? "0" : "") + std::to_string(seconds);
 
 	timerText->setText(time);
-	scoreText->setText("Level: " + std::to_string(current_press_num));
 }
 
 void MainGameScene::onKeyReleased(SDL_Keycode key)

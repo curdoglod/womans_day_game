@@ -48,7 +48,9 @@ public:
             font = nullptr;
         }
 
-        SDL_RWops* rw = SDL_RWFromConstMem(_fontDataBuffer.data(), _fontDataBuffer.size());
+        fontDataBuffer = std::move(_fontDataBuffer);
+
+        SDL_RWops* rw = SDL_RWFromConstMem(fontDataBuffer.data(), fontDataBuffer.size());
         if (!rw) {
             std::cerr << "Failed to create SDL_RWops for font data." << std::endl;
             return;
@@ -67,6 +69,7 @@ public:
     Text
    */
     void setText(const std::string& newText) {
+        if (text == newText) return;
         text = newText;
         UpdateTextures();
     }
