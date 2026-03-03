@@ -13,7 +13,7 @@ MainGameScene::MainGameScene(const std::string &name)
 void MainGameScene::Init()
 {
 	score = 0;
-	count_presses = 6;
+	count_presses = 1;
 	std::vector<unsigned char> panelImgData = Engine::GetResourcesArchive()->GetFile("panel.png");
 	std::vector<unsigned char> bckImgData = Engine::GetResourcesArchive()->GetFile("background.png");
 
@@ -110,6 +110,20 @@ void MainGameScene::Generate_map(int count)
 			belt_support->AddComponent(beltSupportImg);
 			belt_support->SetLayer(-99);
 		}
+
+		std::vector<unsigned char>
+			hangar0Data = Engine::GetResourcesArchive()->GetFile("hangar0.png");
+		std::vector<unsigned char>
+			hangar1Data = Engine::GetResourcesArchive()->GetFile("hangar1.png");
+		Object *hangar0 = CreateObject();
+		Object *hangar1 = CreateObject();
+		hangar0->AddComponent(new Image(hangar0Data));
+		hangar1->AddComponent(new Image(hangar1Data));
+		int offsetX = 1450; 
+		hangar0->SetPosition(Vector2(blocks[blocks.size() - 1]->GetPosition().x + sizeOfPress.x + offsetX, 235)); 
+		hangar1->SetPosition(Vector2(blocks[blocks.size() - 1]->GetPosition().x + sizeOfPress.x + offsetX, 235));
+		hangar0->SetLayer(-102);
+		hangar1->SetLayer(102);
 	}
 }
 
