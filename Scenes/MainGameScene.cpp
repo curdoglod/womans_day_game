@@ -13,7 +13,7 @@ MainGameScene::MainGameScene(const std::string &name)
 void MainGameScene::Init()
 {
 	score = 0;
-	count_presses = 1;
+	count_presses = 6;
 	std::vector<unsigned char> panelImgData = Engine::GetResourcesArchive()->GetFile("panel.png");
 	std::vector<unsigned char> bckImgData = Engine::GetResourcesArchive()->GetFile("background.png");
 

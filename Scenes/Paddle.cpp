@@ -96,6 +96,9 @@ void PaddleComponent::SetCar(int number)
 {
     if(setedCar!=number && carImgData.size()>number)
         img->SetNewSprite(carImgData[number]); 
+    if(setedCar==number) return;
+    if(number==1) 
+        img->SetSize(img->GetSize()/4.0f); 
     setedCar = number; 
 }
 
