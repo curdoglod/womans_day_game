@@ -62,4 +62,32 @@ clean:
 
 re: clean all
 
-.PHONY: all clean re
+# --- Emscripten (Web) Build ---
+WEB_DIR = web_build
+WEB_CXX = emcc
+WEB_CXXFLAGS = -std=c++17 -O2 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 \
+  -s SDL2_IMAGE_FORMATS='["png"]'
+WEB_LDFLAGS = -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 \
+  -s SDL2_IMAGE_FORMATS='["png"]' \
+  -s ALLOW_MEMORY_GROWTH=1 \
+  -s TOTAL_MEMORY=67108864 \
+  --preload-file Assets --preload-file DefaultAssets \
+  --shell-file web/shell.html
+WEB_OBJS = $(patsubst %.cpp,$(WEB_DIR)/%.o,$(SRCS))
+
+web: $(WEB_DIR)/game.html
+
+$(WEB_DIR)/game.html: $(WEB_OBJS)
+	$(WEB_CXX) $^ -o $@ $(WEB_LDFLAGS)
+
+$(WEB_DIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(WEB_CXX) $(WEB_CXXFLAGS) -c $< -o $@
+
+web-clean:
+	rm -rf $(WEB_DIR)
+
+web-serve: web
+	python3 -m http.server 8080 --directory $(WEB_DIR)
+
+.PHONY: all clean re web web-clean web-serve

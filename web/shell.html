@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Woman's Day Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    html {
+      overflow-x: auto;
+    }
+
+    :root {
+      --bg-primary: #fdf2f8;
+      --bg-card: #ffffff;
+      --accent: #ec4899;
+      --accent-dark: #db2777;
+      --accent-light: #fbcfe8;
+      --text: #1f2937;
+      --text-muted: #6b7280;
+      --shadow: 0 20px 60px rgba(236, 72, 153, 0.15), 0 8px 24px rgba(0,0,0,0.08);
+      --shadow-sm: 0 4px 12px rgba(236, 72, 153, 0.1);
+      /* vertical space taken by header + bottom bar */
+      --chrome-h: 130px;
+    }
+
+    body {
+      font-family: 'Comfortaa', 'Nunito', sans-serif;
+      background: var(--bg-primary);
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(251, 207, 232, 0.5) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(249, 168, 212, 0.3) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 80%, rgba(244, 114, 182, 0.2) 0%, transparent 50%);
+      min-height: 100vh;
+      min-width: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text);
+      overflow-y: auto;
+    }
+
+    /* ── Header ── */
+    header {
+      flex-shrink: 0;
+      text-align: center;
+      padding: 0.6rem 1rem 0.4rem;
+      animation: fadeDown 0.8s ease-out;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      width: 100%;
+      max-width: 1280px;
+      justify-content: center;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    header h1 {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 1.6rem;
+      background: linear-gradient(135deg, var(--accent) 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
+    header .sep {
+      color: var(--accent-light);
+      font-size: 1.2rem;
+    }
+
+    /* ── Game wrapper: grows to fill remaining viewport height ── */
+    .game-wrapper {
+      flex: 1;
+      animation: fadeUp 0.8s ease-out 0.2s both;
+      width: 100%;
+      max-width: 1280px;
+      min-width: 280px;
+      padding: 0 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .game-frame {
+      width: 100%;
+      background: transparent;
+      border-radius: 14px;
+      padding: 3px;
+      box-shadow: var(--shadow);
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+
+    .game-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--accent), #a855f7, var(--accent-light), var(--accent));
+      border-radius: 14px;
+      z-index: -1;
+      opacity: 0.7;
+    }
+
+    /* 16:9 container — constrained by both width AND height */
+    .canvas-container {
+      position: relative;
+      /* max width = either 100% of parent OR the width that fits (vh - chrome) at 16:9 */
+      width: min(100%, calc((100vh - var(--chrome-h)) * 16 / 9));
+      aspect-ratio: 16 / 9;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    canvas.emscripten {
+      display: block;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 10px;
+    }
+
+    #loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: opacity 0.5s ease;
+    }
+
+    #loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--accent-light);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    .loading-text {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent-dark);
+    }
+
+    #progress-bar-wrap {
+      width: 220px;
+      height: 5px;
+      background: var(--accent-light);
+      border-radius: 3px;
+      margin-top: 0.8rem;
+      overflow: hidden;
+    }
+
+    #progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #a855f7);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    /* ── Bottom bar: controls + footer in one compact row ── */
+    .bottom-bar {
+      flex-shrink: 0;
+      animation: fadeUp 0.8s ease-out 0.4s both;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1280px;
+      padding: 0.4rem 1.25rem 0.5rem;
+      gap: 1rem;
+    }
+
+    .keys {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .key-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--bg-card);
+      border: 1.5px solid var(--accent-light);
+      border-radius: 8px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent-dark);
+      box-shadow: var(--shadow-sm);
+      white-space: nowrap;
+    }
+
+    .key-badge kbd {
+      display: inline-block;
+      background: var(--accent-light);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: 'Comfortaa', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+    }
+
+    .copyright {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    /* ── Responsive tweaks ── */
+    @media (max-width: 600px) {
+      :root { --chrome-h: 110px; }
+      header h1 { font-size: 1.2rem; }
+      header p, header .sep { display: none; }
+      .bottom-bar { justify-content: center; }
+      .copyright { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Woman's Day Game</h1>
+    <span class="sep">·</span>
+    <p>Arcade mini-game</p>
+  </header>
+
+  <div class="game-wrapper">
+    <div class="game-frame">
+      <div class="canvas-container">
+        <div id="loading-overlay">
+          <div class="loader"></div>
+          <div class="loading-text">Loading game...</div>
+          <div id="progress-bar-wrap">
+            <div id="progress-bar"></div>
+          </div>
+        </div>
+        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="keys">
+      <span class="key-badge"><kbd>Space</kbd> Launch car up</span>
+      <span class="key-badge"><kbd>Enter</kbd> Stop presses</span>
+    </div>
+    <span class="copyright">Woman's Day Game &copy; 2025&ndash;2026</span>
+  </div>
+
+  <script type='text/javascript'>
+    var Module = {
+      preRun: [],
+      postRun: [],
+      print: function(text) { console.log(text); },
+      printErr: function(text) { console.error(text); },
+      canvas: (function() {
+        var canvas = document.getElementById('canvas');
+        canvas.addEventListener("webglcontextlost", function(e) {
+          alert('WebGL context lost. Please reload the page.');
+          e.preventDefault();
+        }, false);
+        return canvas;
+      })(),
+      setStatus: function(text) {
+        if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+        if (text === Module.setStatus.last.text) return;
+        var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+        var now = Date.now();
+        if (m && now - Module.setStatus.last.time < 30) return;
+        Module.setStatus.last.time = now;
+        Module.setStatus.last.text = text;
+
+        if (m) {
+          var progress = parseInt(m[2]) / parseInt(m[4]) * 100;
+          document.getElementById('progress-bar').style.width = progress + '%';
+        } else if (!text) {
+          document.getElementById('loading-overlay').classList.add('hidden');
+          document.getElementById('canvas').focus();
+        }
+      },
+      totalDependencies: 0,
+      monitorRunDependencies: function(left) {
+        this.totalDependencies = Math.max(this.totalDependencies, left);
+        Module.setStatus(left ? 'Loading... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : '');
+      }
+    };
+    Module.setStatus('Loading...');
+    window.onerror = function() {
+      Module.setStatus('Failed to load. Please reload the page.');
+      document.querySelector('.loader').style.display = 'none';
+    };
+  </script>
+  {{{ SCRIPT }}}
+</body>
+</html>

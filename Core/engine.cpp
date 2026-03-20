@@ -7,23 +7,29 @@
 #include "SceneManager.h"
 #include <chrono>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 
 struct Engine::Impl
 {
 
     void preInit()
     {
-        // m_window = SDL_CreateWindow("New Window",
-        //                             SDL_WINDOWPOS_CENTERED,
-        //                             SDL_WINDOWPOS_CENTERED,
-        //                             1280, 720,
-        //                             SDL_WINDOW_FULLSCREEN_DESKTOP);
-
+#ifdef __EMSCRIPTEN__
+        m_window = SDL_CreateWindow("New Window",
+                                    SDL_WINDOWPOS_CENTERED,
+                                    SDL_WINDOWPOS_CENTERED,
+                                    1280, 720,
+                                    SDL_WINDOW_SHOWN);
+#else
         m_window = SDL_CreateWindow("New Window",
                                     SDL_WINDOWPOS_CENTERED,
                                     SDL_WINDOWPOS_CENTERED,
                                     1280, 720,
                                     SDL_WINDOW_FULLSCREEN_DESKTOP);
+#endif
 
         m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
 
@@ -35,11 +41,13 @@ struct Engine::Impl
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
+#ifndef __EMSCRIPTEN__
             if (event.type == SDL_QUIT)
             {
                 SDL_DestroyWindow(m_window);
                 m_window = nullptr;
             }
+#endif
 
             if (currentScene != nullptr)
                 currentScene->UpdateEvents(event);
@@ -53,6 +61,19 @@ struct Engine::Impl
 
         SDL_RenderPresent(m_renderer);
     }
+
+#ifdef __EMSCRIPTEN__
+    std::chrono::high_resolution_clock::time_point lastFrameTime;
+
+    static void emMainLoop(void* arg)
+    {
+        Impl* self = static_cast<Impl*>(arg);
+        auto now = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float, std::milli> frameDuration = now - self->lastFrameTime;
+        self->lastFrameTime = now;
+        self->Tick(frameDuration.count() / 1000.0f);
+    }
+#endif
 
     int FPS = 60;
     SDL_Window *m_window = nullptr;
@@ -89,6 +110,10 @@ void Engine::Run()
 
     Init();
 
+#ifdef __EMSCRIPTEN__
+    impl->lastFrameTime = std::chrono::high_resolution_clock::now();
+    emscripten_set_main_loop_arg(Impl::emMainLoop, impl, 0, 1);
+#else
     auto lastFrameTime = std::chrono::high_resolution_clock::now();
     int frameDelay = 1000 / impl->FPS;
 
@@ -109,6 +134,7 @@ void Engine::Run()
             SDL_Delay(frameDelay - elapsedMS);
         }
     }
+#endif
 }
 
 // void Engine::Run() {
