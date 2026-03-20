@@ -88,6 +88,7 @@ web-clean:
 	rm -rf $(WEB_DIR)
 
 web-serve: web
+	@lsof -ti:8080 | xargs kill -9 2>/dev/null || true
 	python3 -m http.server 8080 --directory $(WEB_DIR)
 
 .PHONY: all clean re web web-clean web-serve
