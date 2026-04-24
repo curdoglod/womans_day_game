@@ -1,4 +1,3 @@
-# Compiler
 CXX = c++
 
 OS := $(shell uname -s 2>/dev/null || echo Windows)

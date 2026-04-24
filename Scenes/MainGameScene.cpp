@@ -46,7 +46,7 @@ void MainGameScene::Init()
 		bck->SetLayer(-500);
 		bck->SetPosition(Vector2(bckimg->GetSize().x * i - 500, 0));
 	}
-	start = std::chrono::steady_clock::now();
+	elapsedGameTimeSeconds = 0.0f;
 	timerText = new TextComponent(20, "0");
 	timerText->SetColor(125, 220, 93);
 
@@ -136,9 +136,11 @@ void MainGameScene::Update()
 						   std::chrono::steady_clock::now() - winTime)
 						   .count();
 		if (elapsed >= 2400)
-			SwitchToScene(new WinScene(playerName));
+			SwitchToScene(new WinScene(finalTimeText_));
 		return;
 	}
+
+	elapsedGameTimeSeconds += GetDeltaTime();
 
 	if (endTransitionActive)
 	{
@@ -151,11 +153,16 @@ void MainGameScene::Update()
 			endTransitionActive = false;
 
 			ScoreBoard *scoreBoard = new ScoreBoard(ScoreBoard::DEFAULT_PATH);
-			std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-			auto elapsed =
-				std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
+			auto elapsed = static_cast<long long>(elapsedGameTimeSeconds);
 			scoreBoard->addRecord(playerName, elapsed);
 			scoreBoard->saveToFile();
+
+			int minutes = static_cast<int>(elapsed / 60);
+			int seconds = static_cast<int>(elapsed % 60);
+			finalTimeText_ =
+				(minutes < 10 ? "0" : "") + std::to_string(minutes) + ":" +
+				(seconds < 10 ? "0" : "") + std::to_string(seconds);
+
 			waitingForWin = true;
 			winTime = std::chrono::steady_clock::now();
 		}
@@ -249,10 +256,7 @@ void MainGameScene::StartEndTransition()
 
 void MainGameScene::ShowTime()
 {
-	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-
-	auto elapsed =
-		std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
+	auto elapsed = static_cast<long long>(elapsedGameTimeSeconds);
 
 	int minutes = static_cast<int>(elapsed / 60);
 	int seconds = static_cast<int>(elapsed % 60);

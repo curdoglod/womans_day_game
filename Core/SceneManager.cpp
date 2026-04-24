@@ -9,6 +9,7 @@ void SceneManager::SetCamera(Camera *cam)
 
 void SceneManager::UpdateScene(float deltaTime)
 {
+    SetFrameDeltaTime(deltaTime);
     Update();
     for (auto &object : objects)
     {
@@ -24,6 +25,8 @@ void SceneManager::UpdateScene(float deltaTime)
             // }
         }
     }
+
+    ApplyPendingSceneSwitch();
 }
 
 

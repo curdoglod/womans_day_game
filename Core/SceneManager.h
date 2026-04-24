@@ -30,6 +30,10 @@ public:
     virtual void Init() {}
 
     virtual void Update() {}
+
+       float GetDeltaTime() const {
+           return frameDeltaTime;
+       }
     
    void UpdateEvents(SDL_Event event) {
       
@@ -61,6 +65,8 @@ public:
             onKeyReleased(event.key.keysym.sym);
             break;
         }
+
+        ApplyPendingSceneSwitch();
 
    }
 
@@ -117,7 +123,11 @@ public:
     void SetCamera(Camera* cam);
 
    void SwitchToScene(SceneManager* newScene) {
-       m_engine->ChangeScene(newScene);
+           if (newScene == nullptr)
+               return;
+           if (pendingScene != nullptr && pendingScene != newScene)
+               delete pendingScene;
+           pendingScene = newScene;
    }
 
    void SetWindowSize(const int& w, const int& h) {
@@ -133,11 +143,27 @@ public:
 
 
 private: 
+    void ApplyPendingSceneSwitch() {
+        if (pendingScene == nullptr)
+            return;
+
+        SceneManager *nextScene = pendingScene;
+        pendingScene = nullptr;
+        m_engine->ChangeScene(nextScene);
+    }
+
     std::vector<Object*> objects;
     Camera* camera = nullptr;
     SDL_Renderer* m_renderer;
     SDL_Window* m_window;
     Engine* m_engine;
+    float frameDeltaTime = 0.0f;
+    SceneManager *pendingScene = nullptr;
+
+protected:
+    void SetFrameDeltaTime(float deltaTime) {
+        frameDeltaTime = deltaTime;
+    }
 };
 
 #endif // SCENE_H

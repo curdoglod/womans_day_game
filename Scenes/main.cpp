@@ -9,6 +9,7 @@ class Game : public Engine {
         SetWindowTitle("Game");
         SetWindowSize(1280, 720);
         ChangeScene(new StartScene());
+        //ChangeScene(new WinScene("00:00"));
      }
 
 };

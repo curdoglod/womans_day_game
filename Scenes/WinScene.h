@@ -7,13 +7,13 @@ struct PlayerRecord;
 class WinScene : public SceneManager
 {
 public:
-    explicit WinScene(const std::string &playerName) : playerName_(playerName) {}
+    explicit WinScene(const std::string &timeText) : timeText_(timeText) {}
 
     void Init() override;
     void onKeyReleased(SDL_Keycode key) override;
 
 private:
-    std::string playerName_;
+    std::string timeText_;
     int currId_ = 0;
 
     void ShowTable(const std::vector<PlayerRecord> &allRecords,

@@ -5,6 +5,7 @@
 #include <SDL_ttf.h>
 #include <algorithm>
 #include "SceneManager.h"
+#include "sprite.h"
 #include <chrono>
 
 #ifdef __EMSCRIPTEN__
@@ -23,15 +24,19 @@ struct Engine::Impl
                                     SDL_WINDOWPOS_CENTERED,
                                     1280, 720,
                                     SDL_WINDOW_SHOWN);
+
+    // Force software renderer on web to bypass EGL swap-interval setup.
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "0");
+    m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_SOFTWARE);
 #else
         m_window = SDL_CreateWindow("New Window",
                                     SDL_WINDOWPOS_CENTERED,
                                     SDL_WINDOWPOS_CENTERED,
                                     1280, 720,
                                     SDL_WINDOW_FULLSCREEN_DESKTOP);
+    m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
 #endif
-
-        m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
 
        SDL_RenderSetLogicalSize(m_renderer, 1280, 720);
     }
@@ -49,6 +54,26 @@ struct Engine::Impl
             }
 #endif
 
+            if (event.type == SDL_WINDOWEVENT)
+            {
+                if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST ||
+                    event.window.event == SDL_WINDOWEVENT_HIDDEN ||
+                    event.window.event == SDL_WINDOWEVENT_MINIMIZED)
+                {
+                    pausedByFocus = true;
+                }
+                else if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED ||
+                         event.window.event == SDL_WINDOWEVENT_SHOWN ||
+                         event.window.event == SDL_WINDOWEVENT_RESTORED)
+                {
+                    pausedByFocus = false;
+#ifdef __EMSCRIPTEN__
+                    // Reset frame timer after tab/window restore to avoid a huge delta spike.
+                    lastFrameTime = std::chrono::high_resolution_clock::now();
+#endif
+                }
+            }
+
             if (currentScene != nullptr)
                 currentScene->UpdateEvents(event);
         }
@@ -56,8 +81,11 @@ struct Engine::Impl
         SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
         SDL_RenderClear(m_renderer);
 
+        float effectiveDeltaTime = pausedByFocus ? 0.0f : deltaTime;
+        effectiveDeltaTime = std::min(effectiveDeltaTime, maxDeltaTime);
+
         if (currentScene != nullptr)
-            currentScene->UpdateScene(deltaTime);
+            currentScene->UpdateScene(effectiveDeltaTime);
 
         SDL_RenderPresent(m_renderer);
     }
@@ -76,6 +104,8 @@ struct Engine::Impl
 #endif
 
     int FPS = 60;
+    bool pausedByFocus = false;
+    const float maxDeltaTime = 1.0f / 20.0f;
     SDL_Window *m_window = nullptr;
     SDL_Renderer *m_renderer = nullptr;
     std::string nameWindow;
@@ -201,6 +231,7 @@ void Engine::SetWindowTitle(const std::string &newTitle)
 
 void Engine::Quit()
 {
+    Sprite::ClearTextureCache();
     SDL_DestroyRenderer(impl->m_renderer);
     SDL_DestroyWindow(impl->m_window);
     IMG_Quit();
@@ -209,6 +240,7 @@ void Engine::Quit()
 
 Engine::~Engine()
 {
+    Sprite::ClearTextureCache();
     SDL_DestroyRenderer(impl->m_renderer);
     SDL_DestroyWindow(impl->m_window);
     IMG_Quit();

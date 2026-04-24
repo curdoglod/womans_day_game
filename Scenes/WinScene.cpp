@@ -8,43 +8,30 @@ void WinScene::Init()
     bck_screen->SetLayer(-1000);
     bck_screen->AddComponent(new Image(bck_screen_img));
     SetWindowSize(1280, 720);
-    ScoreBoard *scoreBoard = new ScoreBoard(ScoreBoard::DEFAULT_PATH);
-    std::vector<unsigned char> winImgData = Engine::GetResourcesArchive()->GetFile("win_screen_v2.png");
+    //ScoreBoard *scoreBoard = new ScoreBoard(ScoreBoard::DEFAULT_PATH);
+    std::vector<unsigned char> winImgData = Engine::GetResourcesArchive()->GetFile("win_screen.png");
 
     Object *win_screen = CreateObject();
     win_screen->AddComponent(new Image(winImgData));
+    win_screen->GetComponent<Image>()->SetSize(Vector2(1280, 720)); 
 
-    const auto &records = scoreBoard->getRecords();
-    currId_ = scoreBoard->getLastId();
+    Object *timeObj = CreateObject();
+    timeObj->SetPosition(Vector2(640, 361));
+    TextComponent *timeTextComp = new TextComponent(49, timeText_, TextAlignment::LEFT);
+    timeTextComp->SetOutline(0, {0, 0, 0, 255});
+    timeTextComp->SetColor(0, 0, 0);
+    timeObj->AddComponent(timeTextComp);
 
-    // Find and show current run in the gold banner
-    for (size_t i = 0; i < records.size(); ++i)
-    {
-        if (records[i].id == currId_)
-        {
-            int minutes = static_cast<int>(records[i].time / 60);
-            int seconds = static_cast<int>(records[i].time % 60);
+    std::vector<unsigned char> button_img = Engine::GetResourcesArchive()->GetFile("button_restart.png");
 
-            std::string time = (minutes < 10 ? "0" : "") + std::to_string(minutes) + ":" + (seconds < 10 ? "0" : "") + std::to_string(seconds);
-            int rank = static_cast<int>(i) + 1;
-            std::string lineText = std::to_string(rank) + ". " + records[i].name + " - " + time;
+    Object *restart_button = CreateObject();
+    restart_button->SetPosition(Vector2(898 / 2, 995 / 2));
+        restart_button->AddComponent(new ButtonComponent([this]()
+                                                                                                         { SwitchToScene(new MainGameScene("")); }));
 
-            Object *bannerObj = CreateObject();
-            bannerObj->SetPosition(Vector2(GetWindowSize().x / 2 + 40, 160));
-            TextComponent *textComp = new TextComponent(30, "", TextAlignment::CENTER);
-            textComp->SetOutline(2, {0, 0, 0, 255});
-            textComp->SetColor(255, 255, 255);
-            textComp->setText(lineText);
-            bannerObj->AddComponent(textComp);
-            break;
-        }
-    }
-
-    std::vector<size_t> top10Idx;
-    for (size_t i = 0; i < records.size() && i < 10; ++i)
-        top10Idx.push_back(i);
-    ShowTable(records, top10Idx, 0);
-    delete scoreBoard;
+        Image *restartBttn_image = restart_button->GetComponent<Image>();
+        restartBttn_image->SetNewSprite(button_img);
+    restartBttn_image->SetSize(restartBttn_image->GetSize() / 2);
 }
 
 void WinScene::ShowTable(const std::vector<PlayerRecord> &allRecords,
@@ -82,15 +69,10 @@ void WinScene::ShowTable(const std::vector<PlayerRecord> &allRecords,
         textComp->SetOutline(2, {0, 0, 0, 255});
         rowObj->AddComponent(textComp);
 
-        if (rec.name == playerName_)
-        {
-            if (currId_ == rec.id)
-                textComp->SetColor(255, 215, 0); // Gold for the current run
-            else
-                textComp->SetColor(200, 150, 255); // Soft purple for player's other top 10 runs
-        }
+        if (currId_ == rec.id)
+            textComp->SetColor(255, 215, 0); // Gold for the current run
         else
-            textComp->SetColor(255, 255, 255); // White for other players
+            textComp->SetColor(255, 255, 255); // White for other rows
 
         textComp->setText(lineText);
     }

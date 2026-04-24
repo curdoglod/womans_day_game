@@ -55,7 +55,7 @@ private:
 
 	static std::string playerName;
 
-	std::chrono::steady_clock::time_point start;
-	std::chrono::steady_clock::time_point last;
+	float elapsedGameTimeSeconds = 0.0f;
 	std::chrono::steady_clock::time_point winTime;
+	std::string finalTimeText_ = "00:00";
 };
